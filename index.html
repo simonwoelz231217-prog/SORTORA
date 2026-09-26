@@ -26,7 +26,14 @@
         body.bg-neon { background: radial-gradient(circle at center, #831843 0%, #09090b 100%); }
         body.bg-dark { background: linear-gradient(180deg, #18181b 0%, #09090b 100%); }
 
-        header { text-align: center; width: 100%; max-width: 600px; position: relative; margin-bottom: 10px; }
+        /* HAUPTCONTAINER PASST SICH DEM GEWÄHLTEN FORMAT AN */
+        .game-wrapper {
+            width: 100%; display: flex; flex-direction: column; align-items: center; transition: all 0.3s ease;
+        }
+        body.mode-portrait .game-wrapper { max-width: 600px; } /* Virtuelles Hochformat (600px Basis) */
+        body.mode-landscape .game-wrapper { max-width: 1100px; } /* Virtuelles Querformat */
+
+        header { text-align: center; width: 100%; position: relative; margin-bottom: 10px; }
         .top-bar-btns { position: absolute; top: 0; right: 5px; display: flex; gap: 8px; z-index: 10; }
 
         .icon-btn {
@@ -43,9 +50,8 @@
         .l-s1 { color: #facc15; } .l-o1 { color: #06b6d4; } .l-r1 { color: #ec4899; }
         .l-t  { color: #f97316; } .l-o2 { color: #22c55e; } .l-r2 { color: #a855f7; } .l-a  { color: #3b82f6; }
 
-        /* STABILER SCREEN-FLUSS OHNE HÖHEN-BUGS */
         .screen { 
-            display: none; width: 100%; max-width: 650px; flex-direction: column; align-items: center; margin: 0 auto; padding-bottom: 30px;
+            display: none; width: 100%; flex-direction: column; align-items: center; margin: 0 auto; padding-bottom: 30px;
         }
         .screen.active { display: flex; }
 
@@ -83,7 +89,7 @@
         .timer-badge { color: #ef4444 !important; }
 
         .capacity-badge {
-            display: inline-block; background: rgba(250, 204, 21, 0.25); border: 1px solid var(--gold-color);
+            display: inline-block; background: rgba(250, 204, 21, 0.25); border: 1px solid var(--glass-border);
             color: var(--gold-color); padding: 3px 8px; border-radius: 8px; font-size: 0.75rem; font-weight: bold; margin-bottom: 6px;
         }
 
@@ -151,83 +157,85 @@
         #fx-canvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 99; }
     </style>
 </head>
-<body class="bg-lab">
+<body class="mode-portrait bg-lab">
 
     <canvas id="fx-canvas"></canvas>
 
-    <header>
-        <div class="top-bar-btns">
-            <button class="icon-btn" onclick="openShop()">🛒</button>
-            <button class="icon-btn" onclick="openAchievements()">🏆</button>
-            <button class="icon-btn" onclick="openSettings()">⚙️</button>
-        </div>
-        <div class="logo">
-            <span class="l-s1">S</span><span class="l-o1">O</span><span class="l-r1">R</span><span class="l-t">T</span><span class="l-o2">O</span><span class="l-r2">R</span><span class="l-a">A</span>
-        </div>
-    </header>
-
-    <!-- MAIN MENU -->
-    <div class="screen active" id="main-menu">
-        <div class="mode-selection">
-            <div class="card-mode" onclick="showLevelMap('classic')">
-                <div class="card-title"><span id="txt-mode-classic">🎮 Klassisch</span><span>➔</span></div>
-                <div class="card-stats">
-                    <div><span id="txt-lbl-lvl">Level:</span> <span id="menu-classic-lvl">1</span>/200</div>
-                    <div><span id="txt-lbl-stars">Sterne:</span> <span id="menu-classic-stars">0</span> ⭐</div>
-                </div>
+    <div class="game-wrapper">
+        <header>
+            <div class="top-bar-btns">
+                <button class="icon-btn" onclick="openShop()">🛒</button>
+                <button class="icon-btn" onclick="openAchievements()">🏆</button>
+                <button class="icon-btn" onclick="openSettings()">⚙️</button>
             </div>
-            <div class="card-mode" onclick="showLevelMap('timer')">
-                <div class="card-title"><span id="txt-mode-timer">⏱️ Zeitmodus</span><span>➔</span></div>
-                <div class="card-stats">
-                    <div><span id="txt-lbl-lvl2">Level:</span> <span id="menu-timer-lvl">1</span>/200</div>
-                    <div><span id="txt-lbl-stars2">Sterne:</span> <span id="menu-timer-stars">0</span> ⭐</div>
-                </div>
+            <div class="logo">
+                <span class="l-s1">S</span><span class="l-o1">O</span><span class="l-r1">R</span><span class="l-t">T</span><span class="l-o2">O</span><span class="l-r2">R</span><span class="l-a">A</span>
             </div>
-            <button class="btn" style="background:linear-gradient(90deg, #ec4899, #8b5cf6); padding:8px; font-size:0.85rem;" onclick="watchRewardedAd()">
-                📺 +50 Bonus-Sterne (Werbung)
-            </button>
-        </div>
-    </div>
+        </header>
 
-    <!-- LEVEL MAP -->
-    <div class="screen" id="level-map">
-        <div style="display:flex; justify-content:space-between; width:100%; align-items:center; margin-bottom:6px;">
-            <button class="btn" onclick="showMainMenu()"><span id="txt-btn-back">⬅️ Menü</span></button>
-            <h3 id="mode-title" style="font-size: 1rem;">Klassischer Modus</h3>
-            <div style="font-weight:bold; color:var(--gold-color); font-size:0.9rem;" id="map-stars-total">0 ⭐</div>
-        </div>
-        <div class="level-grid" id="level-grid"></div>
-    </div>
-
-    <!-- INGAME SPIELFELD -->
-    <div class="screen" id="game-screen">
-        <div class="stats-bar">
-            <div class="stat-item">Level: <span id="level-num">1</span></div>
-            <div class="stat-item"><span id="txt-lbl-moves">Züge</span>: <span id="moves-num">0</span></div>
-            <div class="stat-item" id="timer-box" style="display:none;"><span id="txt-lbl-time">Zeit</span>: <span id="time-left" class="timer-badge">60</span>s</div>
-            <div class="stat-item"><span id="txt-lbl-stars3">Sterne</span>: <span id="stars-total">0</span> ⭐</div>
-        </div>
-
-        <div><span class="capacity-badge" id="capacity-badge">🧪 Glas: 4 Bälle</span></div>
-
-        <div class="missions-card" id="missions-card">
-            <div style="font-weight:bold; margin-bottom:1px; color:#93c5fd;" id="txt-lbl-missions">🎯 Missionen</div>
-            <div class="mission-item" id="m1"><span class="mission-icon">⚪</span> <span id="txt-m1">Level lösen</span></div>
-            <div class="mission-item" id="m2"><span class="mission-icon">⚪</span> <span id="m2-text">Unter X Zügen bleiben</span></div>
-            <div class="mission-item" id="m3"><span class="mission-icon">⚪</span> <span id="txt-m3">Kein Extra-Glas benutzen</span></div>
+        <!-- MAIN MENU -->
+        <div class="screen active" id="main-menu">
+            <div class="mode-selection">
+                <div class="card-mode" onclick="showLevelMap('classic')">
+                    <div class="card-title"><span id="txt-mode-classic">🎮 Klassisch</span><span>➔</span></div>
+                    <div class="card-stats">
+                        <div><span id="txt-lbl-lvl">Level:</span> <span id="menu-classic-lvl">1</span>/200</div>
+                        <div><span id="txt-lbl-stars">Sterne:</span> <span id="menu-classic-stars">0</span> ⭐</div>
+                    </div>
+                </div>
+                <div class="card-mode" onclick="showLevelMap('timer')">
+                    <div class="card-title"><span id="txt-mode-timer">⏱️ Zeitmodus</span><span>➔</span></div>
+                    <div class="card-stats">
+                        <div><span id="txt-lbl-lvl2">Level:</span> <span id="menu-timer-lvl">1</span>/200</div>
+                        <div><span id="txt-lbl-stars2">Sterne:</span> <span id="menu-timer-stars">0</span> ⭐</div>
+                    </div>
+                </div>
+                <button class="btn" style="background:linear-gradient(90deg, #ec4899, #8b5cf6); padding:8px; font-size:0.85rem;" onclick="watchRewardedAd()">
+                    📺 +50 Bonus-Sterne (Werbung)
+                </button>
+            </div>
         </div>
 
-        <div class="controls">
-            <button class="btn" onclick="showLevelMap(gameMode)"><span id="txt-btn-map">🏠 Karte</span></button>
-            <button class="btn" id="undo-btn" onclick="undoMove()" disabled><span id="txt-btn-undo">↩️ Rückgängig</span></button>
-            <button class="btn" onclick="shuffleTubes()">🔀 Mischen</button>
-            <button class="btn" id="add-tube-btn" onclick="addExtraTube()"><span id="txt-btn-tube">🧪 +1 Glas</span></button>
-            <button class="btn" onclick="restartLevel()"><span id="txt-btn-restart">🔄 Neustart</span></button>
+        <!-- LEVEL MAP -->
+        <div class="screen" id="level-map">
+            <div style="display:flex; justify-content:space-between; width:100%; align-items:center; margin-bottom:6px;">
+                <button class="btn" onclick="showMainMenu()"><span id="txt-btn-back">⬅️ Menü</span></button>
+                <h3 id="mode-title" style="font-size: 1rem;">Klassischer Modus</h3>
+                <div style="font-weight:bold; color:var(--gold-color); font-size:0.9rem;" id="map-stars-total">0 ⭐</div>
+            </div>
+            <div class="level-grid" id="level-grid"></div>
         </div>
 
-        <div class="board-container">
-            <div class="game-board" id="game-board"></div>
-            <div class="wood-table"></div>
+        <!-- INGAME SPIELFELD -->
+        <div class="screen" id="game-screen">
+            <div class="stats-bar">
+                <div class="stat-item">Level: <span id="level-num">1</span></div>
+                <div class="stat-item"><span id="txt-lbl-moves">Züge</span>: <span id="moves-num">0</span></div>
+                <div class="stat-item" id="timer-box" style="display:none;"><span id="txt-lbl-time">Zeit</span>: <span id="time-left" class="timer-badge">60</span>s</div>
+                <div class="stat-item"><span id="txt-lbl-stars3">Sterne</span>: <span id="stars-total">0</span> ⭐</div>
+            </div>
+
+            <div><span class="capacity-badge" id="capacity-badge">🧪 Glas: 4 Bälle</span></div>
+
+            <div class="missions-card" id="missions-card">
+                <div style="font-weight:bold; margin-bottom:1px; color:#93c5fd;" id="txt-lbl-missions">🎯 Missionen</div>
+                <div class="mission-item" id="m1"><span class="mission-icon">⚪</span> <span id="txt-m1">Level lösen</span></div>
+                <div class="mission-item" id="m2"><span class="mission-icon">⚪</span> <span id="m2-text">Unter X Zügen bleiben</span></div>
+                <div class="mission-item" id="m3"><span class="mission-icon">⚪</span> <span id="txt-m3">Kein Extra-Glas benutzen</span></div>
+            </div>
+
+            <div class="controls">
+                <button class="btn" onclick="showLevelMap(gameMode)"><span id="txt-btn-map">🏠 Karte</span></button>
+                <button class="btn" id="undo-btn" onclick="undoMove()" disabled><span id="txt-btn-undo">↩️ Rückgängig</span></button>
+                <button class="btn" onclick="shuffleTubes()">🔀 Mischen</button>
+                <button class="btn" id="add-tube-btn" onclick="addExtraTube()"><span id="txt-btn-tube">🧪 +1 Glas</span></button>
+                <button class="btn" onclick="restartLevel()"><span id="txt-btn-restart">🔄 Neustart</span></button>
+            </div>
+
+            <div class="board-container">
+                <div class="game-board" id="game-board"></div>
+                <div class="wood-table"></div>
+            </div>
         </div>
     </div>
 
@@ -262,6 +270,10 @@
             <div style="margin:8px 0; display:flex; justify-content:space-between; align-items:center;">
                 <span id="txt-lbl-lang">🌐 Sprache / Language</span>
                 <button class="btn" id="lang-btn" onclick="toggleLanguage()">DE 🇩🇪</button>
+            </div>
+            <div style="margin:8px 0; display:flex; justify-content:space-between; align-items:center;">
+                <span id="txt-lbl-orient">📐 Format</span>
+                <button class="btn" id="orient-btn" onclick="toggleOrientation()">Hoch (600px)</button>
             </div>
             <div style="text-align:left; margin-top:6px;">
                 <span style="font-weight:bold; font-size:0.8rem;" id="txt-lbl-bg">🎨 Hintergrund:</span>
@@ -319,6 +331,7 @@
         let soundEnabled = safeGet('sortora_sound', true);
         let currentLang = safeGet('sortora_lang', 'de');
         let currentBgTheme = safeGet('sortora_bg', 'bg-lab');
+        let currentOrientation = safeGet('sortora_orient', 'portrait');
 
         let classicUnlocked = safeGet('sortora_classic_unlocked', 1);
         let classicStarsData = safeGet('sortora_classic_stars', {});
@@ -340,7 +353,7 @@
                 moves: "Züge", time: "Zeit", missions: "🎯 Missionen", m1: "Level lösen", m2: "Unter {moves} Zügen bleiben",
                 m3: "Kein Extra-Glas benutzen", btnMap: "🏠 Karte", btnUndo: "↩️ Rückgängig", btnTube: "🧪 +1 Glas",
                 btnRestart: "🔄 Neustart", settingsTitle: "⚙️ Einstellungen", soundLbl: "🔊 Sound & Musik", langLbl: "🌐 Sprache / Language",
-                bgLbl: "🎨 Hintergrund:", btnClose: "Schließen", winTitle: "SORTORA Meister! 🎉", btnNext: "Nächstes Level ➔",
+                orientLbl: "📐 Format", bgLbl: "🎨 Hintergrund:", btnClose: "Schließen", winTitle: "SORTORA Meister! 🎉", btnNext: "Nächstes Level ➔",
                 loseTitle: "Zeit Abgelaufen! ⏰", loseDesc: "Versuche es noch einmal schneller!", btnTryAgain: "🔄 Nochmal versuchen",
                 capacityBadge: "🧪 Glas: {cap} Bälle ({cols} Farben)"
             },
@@ -349,7 +362,7 @@
                 moves: "Moves", time: "Time", missions: "🎯 Missions", m1: "Solve Level", m2: "Stay under {moves} moves",
                 m3: "No Extra Tube used", btnMap: "🏠 Map", btnUndo: "↩️ Undo", btnTube: "🧪 +1 Tube",
                 btnRestart: "🔄 Restart", settingsTitle: "⚙️ Settings", soundLbl: "🔊 Sound & Music", langLbl: "🌐 Language / Sprache",
-                bgLbl: "🎨 Background:", btnClose: "Close", winTitle: "SORTORA Master! 🎉", btnNext: "Next Level ➔",
+                orientLbl: "📐 Format", bgLbl: "🎨 Background:", btnClose: "Close", winTitle: "SORTORA Master! 🎉", btnNext: "Next Level ➔",
                 loseTitle: "Time's Up! ⏰", loseDesc: "Try again and be faster!", btnTryAgain: "🔄 Try Again",
                 capacityBadge: "🧪 Tube: {cap} Balls ({cols} Colors)"
             }
@@ -363,8 +376,23 @@
                     crazySDK.init().then(() => crazySDK.game.loadingStop()).catch(() => {});
                 }
             } catch(e) {}
+            applyOrientation(currentOrientation);
             showMainMenu();
         });
+
+        function applyOrientation(orient) {
+            currentOrientation = orient;
+            safeSet('sortora_orient', orient);
+            document.body.className = document.body.className.replace(/mode-(portrait|landscape)/g, '');
+            document.body.classList.add('mode-' + orient);
+            let btn = document.getElementById('orient-btn');
+            if (btn) btn.innerText = orient === 'portrait' ? 'Hoch (600px)' : 'Quer (1100px)';
+        }
+
+        function toggleOrientation() {
+            let next = currentOrientation === 'portrait' ? 'landscape' : 'portrait';
+            applyOrientation(next);
+        }
 
         let audioCtx = null;
         function playSound(type) {
@@ -514,6 +542,7 @@
             document.getElementById('txt-settings-title').innerText = t.settingsTitle;
             document.getElementById('txt-lbl-sound').innerText = t.soundLbl;
             document.getElementById('txt-lbl-lang').innerText = t.langLbl;
+            document.getElementById('txt-lbl-orient').innerText = t.orientLbl;
             document.getElementById('txt-lbl-bg').innerText = t.bgLbl;
             document.getElementById('txt-btn-close').innerText = t.btnClose;
             document.getElementById('txt-win-title').innerText = t.winTitle;
@@ -537,7 +566,9 @@
         }
 
         function setBgTheme(themeClass) {
-            document.body.className = themeClass; currentBgTheme = themeClass; safeSet('sortora_bg', themeClass);
+            document.body.className = document.body.className.replace(/bg-[a-z]+/g, '') + ' ' + themeClass;
+            currentBgTheme = themeClass; 
+            safeSet('sortora_bg', themeClass);
             document.querySelectorAll('.bg-btn').forEach(btn => btn.classList.remove('active'));
             let btnEl = document.getElementById('bg-btn-' + themeClass.replace('bg-', ''));
             if(btnEl) btnEl.classList.add('active');
