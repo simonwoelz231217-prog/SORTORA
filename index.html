@@ -167,6 +167,7 @@
         </div>
     </header>
 
+    <!-- MAIN MENU -->
     <div class="screen active" id="main-menu">
         <div class="mode-selection">
             <div class="card-mode" onclick="showLevelMap('classic')">
@@ -189,6 +190,7 @@
         </div>
     </div>
 
+    <!-- LEVEL MAP -->
     <div class="screen" id="level-map">
         <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
             <button class="btn" onclick="showMainMenu()"><span id="txt-btn-back">⬅️ Menü</span></button>
@@ -198,6 +200,7 @@
         <div class="level-grid" id="level-grid"></div>
     </div>
 
+    <!-- INGAME SPIELFELD -->
     <div class="screen" id="game-screen">
         <div class="stats-bar">
             <div class="stat-item">Level: <span id="level-num">1</span></div>
@@ -229,6 +232,7 @@
         </div>
     </div>
 
+    <!-- MODALS -->
     <div class="modal" id="shop-modal">
         <div class="modal-content">
             <h2 style="color:var(--gold-color);">🛒 Skin-Shop</h2>
@@ -349,10 +353,14 @@
             showMainMenu();
         });
 
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        // Mobil-sicherer AudioContext (wird erst bei Sound-Nutzung initialisiert)
+        let audioCtx = null;
         function playSound(type) {
             if (!soundEnabled) return;
             try {
+                if (!audioCtx) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
                 if (audioCtx.state === 'suspended') audioCtx.resume();
                 const now = audioCtx.currentTime;
                 if (type === 'select') {
@@ -553,7 +561,6 @@
                 btn.className = `level-btn ${isUnlocked ? 'unlocked' : 'locked'}`;
                 btn.innerHTML = `<span>${isUnlocked ? i : '🔒'}</span>${isUnlocked && starsData[i] ? `<div class="level-stars">${'⭐'.repeat(starsData[i])}</div>` : ''}`;
                 
-                // WICHTIG: Hier wird beim Klicken jetzt direkt das Level sauber gestartet!
                 if (isUnlocked) {
                     btn.onclick = (function(levelNum) {
                         return function() {
