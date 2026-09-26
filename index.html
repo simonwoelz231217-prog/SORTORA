@@ -8,7 +8,7 @@
     <style>
         :root {
             --bg-gradient: radial-gradient(circle at center, #1e62d0 0%, #082252 100%);
-            --glass-border: rgba(255, 255, 255, 0.8);
+            --glass-border: rgba(255, 255, 255, 0.4);
             --text-color: #ffffff;
             --gold-color: #facc15;
         }
@@ -26,11 +26,11 @@
         body.bg-neon { background: radial-gradient(circle at center, #831843 0%, #09090b 100%); }
         body.bg-dark { background: linear-gradient(180deg, #18181b 0%, #09090b 100%); }
 
-        header { text-align: center; width: 100%; max-width: 650px; position: relative; padding: 2px 0; }
+        header { text-align: center; width: 100%; max-width: 650px; position: relative; padding: 2px 0; flex-shrink: 0; }
         .top-bar-btns { position: absolute; top: 2px; right: 5px; display: flex; gap: 6px; z-index: 10; }
 
         .icon-btn {
-            background: rgba(255, 255, 255, 0.3); border: 2px solid var(--glass-border); color: #fff;
+            background: rgba(255, 255, 255, 0.25); border: 2px solid var(--glass-border); color: #fff;
             width: 38px; height: 38px; border-radius: 50%; font-size: 1.1rem; cursor: pointer;
             display: flex; align-items: center; justify-content: center;
         }
@@ -43,86 +43,92 @@
         .l-s1 { color: #facc15; } .l-o1 { color: #06b6d4; } .l-r1 { color: #ec4899; }
         .l-t  { color: #f97316; } .l-o2 { color: #22c55e; } .l-r2 { color: #a855f7; } .l-a  { color: #3b82f6; }
 
-        .screen { display: none; width: 100%; max-width: 700px; flex-direction: column; align-items: center; justify-content: flex-start; flex: 1; padding: 2px 0; }
+        /* WICHTIG: Scrollbar auf kleinen Handys, damit nichts abgeschnitten wird */
+        .screen { 
+            display: none; width: 100%; max-width: 700px; flex-direction: column; align-items: center; justify-content: flex-start; flex: 1; padding: 4px 0;
+            overflow-y: auto; max-height: calc(100vh - 70px);
+        }
         .screen.active { display: flex; }
 
         .mode-selection { display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 400px; margin-top: 10px; }
         .card-mode {
-            background: rgba(255, 255, 255, 0.2); border: 2px solid var(--glass-border); border-radius: 16px;
+            background: rgba(255, 255, 255, 0.15); border: 2px solid var(--glass-border); border-radius: 16px;
             padding: 14px; cursor: pointer; box-shadow: 0 6px 15px rgba(0,0,0,0.3);
             display: flex; flex-direction: column; gap: 4px;
         }
-        .card-mode:hover { background: rgba(255, 255, 255, 0.3); border-color: var(--gold-color); }
+        .card-mode:hover { background: rgba(255, 255, 255, 0.25); border-color: var(--gold-color); }
         .card-title { font-size: 1.1rem; font-weight: 800; display: flex; justify-content: space-between; align-items: center; }
-        .card-stats { display: flex; justify-content: space-between; font-size: 0.8rem; color: #cbd5e1; background: rgba(0, 0, 0, 0.4); padding: 5px 10px; border-radius: 8px; }
+        .card-stats { display: flex; justify-content: space-between; font-size: 0.8rem; color: #cbd5e1; background: rgba(0, 0, 0, 0.3); padding: 5px 10px; border-radius: 8px; }
         .card-stats span { color: var(--gold-color); font-weight: bold; }
 
         .level-grid {
             display: grid; grid-template-columns: repeat(auto-fill, minmax(55px, 1fr)); gap: 6px;
-            width: 100%; max-height: 65vh; overflow-y: auto; padding: 10px; background: rgba(8, 34, 82, 0.9);
+            width: 100%; max-height: 65vh; overflow-y: auto; padding: 10px; background: rgba(8, 34, 82, 0.85);
             border: 2px solid var(--glass-border); border-radius: 16px; margin-top: 8px;
         }
         .level-btn {
-            background: rgba(255, 255, 255, 0.2); border: 2px solid var(--glass-border); border-radius: 12px;
+            background: rgba(255, 255, 255, 0.15); border: 2px solid var(--glass-border); border-radius: 12px;
             aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
             font-size: 0.9rem; font-weight: 800; color: #fff; cursor: pointer;
         }
         .level-btn.unlocked { background: linear-gradient(135deg, #2563eb, #1d4ed8); border-color: #60a5fa; }
-        .level-btn.locked { opacity: 0.4; cursor: not-allowed; background: rgba(0, 0, 0, 0.5); }
+        .level-btn.locked { opacity: 0.4; cursor: not-allowed; background: rgba(0, 0, 0, 0.4); }
         .level-stars { font-size: 0.6rem; margin-top: 1px; color: var(--gold-color); }
 
         .stats-bar {
-            display: flex; justify-content: space-around; background: rgba(255, 255, 255, 0.25);
+            display: flex; justify-content: space-around; background: rgba(255, 255, 255, 0.2);
             border: 2px solid var(--glass-border); padding: 6px 10px;
-            border-radius: 12px; margin-bottom: 4px; font-weight: 700; width: 100%; font-size: 0.85rem;
+            border-radius: 12px; margin-bottom: 4px; font-weight: 700; width: 100%; font-size: 0.85rem; flex-shrink: 0;
         }
         .stat-item span { color: var(--gold-color); font-size: 0.95rem; }
         .timer-badge { color: #ef4444 !important; }
 
         .capacity-badge {
-            display: inline-block; background: rgba(250, 204, 21, 0.3); border: 1px solid var(--gold-color);
-            color: var(--gold-color); padding: 2px 8px; border-radius: 8px; font-size: 0.7rem; font-weight: bold; margin-bottom: 2px;
+            display: inline-block; background: rgba(250, 204, 21, 0.25); border: 1px solid var(--gold-color);
+            color: var(--gold-color); padding: 2px 8px; border-radius: 8px; font-size: 0.7rem; font-weight: bold; margin-bottom: 2px; flex-shrink: 0;
         }
 
         .missions-card {
-            background: rgba(8, 34, 82, 0.9); border: 1px solid var(--glass-border); border-radius: 12px;
-            padding: 4px 10px; margin-bottom: 4px; text-align: left; width: 100%; font-size: 0.75rem;
+            background: rgba(8, 34, 82, 0.85); border: 1px solid var(--glass-border); border-radius: 12px;
+            padding: 4px 10px; margin-bottom: 4px; text-align: left; width: 100%; font-size: 0.75rem; flex-shrink: 0;
         }
         .mission-item { display: flex; align-items: center; gap: 5px; margin: 1px 0; color: #e2e8f0; }
         .mission-item.completed { color: #4ade80; font-weight: bold; }
 
-        .controls { display: flex; gap: 5px; margin: 4px 0; flex-wrap: wrap; justify-content: center; }
+        .controls { display: flex; gap: 5px; margin: 4px 0; flex-wrap: wrap; justify-content: center; flex-shrink: 0; }
         .btn {
-            background: rgba(255, 255, 255, 0.25); border: 2px solid var(--glass-border); color: var(--text-color);
+            background: rgba(255, 255, 255, 0.22); border: 2px solid var(--glass-border); color: var(--text-color);
             padding: 5px 10px; border-radius: 10px; cursor: pointer; font-weight: 700; font-size: 0.75rem;
         }
         .btn:hover { background: #a855f7; border-color: #a855f7; }
         .btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-        .board-container { position: relative; display: flex; flex-direction: column; align-items: center; width: 100%; margin-top: 2px; }
-        .game-board { display: flex; flex-wrap: wrap; justify-content: center; align-content: center; gap: 12px 8px; width: 100%; min-height: 200px; padding: 5px; z-index: 2; }
-        .wood-table { width: 95%; height: 14px; background: linear-gradient(180deg, #d97706 0%, #b45309 60%, #78350f 100%); border-radius: 8px; border: 2px solid #f59e0b; margin-top: -5px; z-index: 1; }
+        .board-container { position: relative; display: flex; flex-direction: column; align-items: center; width: 100%; margin-top: 2px; flex-shrink: 0; }
+        .game-board { display: flex; flex-wrap: wrap; justify-content: center; align-content: center; gap: 10px 6px; width: 100%; min-height: 220px; padding: 5px; z-index: 2; flex-shrink: 0; }
+        .wood-table { width: 95%; height: 14px; background: linear-gradient(180deg, #d97706 0%, #b45309 60%, #78350f 100%); border-radius: 8px; border: 2px solid #f59e0b; margin-top: -5px; z-index: 1; flex-shrink: 0; }
 
-        /* DEUTLICHE, SICHTBARE GLÄSER & BÄLLE */
+        /* EDLE GLAS-OPTIK (Ohne harte weiße Ränder) */
         .tube {
-            width: 48px; border: 4px solid #ffffff; border-top: none;
-            border-radius: 0 0 22px 22px; background: rgba(255, 255, 255, 0.25);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6), inset 0 0 10px rgba(255, 255, 255, 0.5);
+            width: 44px; border: 3px solid rgba(255, 255, 255, 0.7); border-top: none;
+            border-radius: 0 0 20px 20px; background: rgba(255, 255, 255, 0.18);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4), inset 0 0 10px rgba(255, 255, 255, 0.3);
             position: relative; display: flex; flex-direction: column-reverse; align-items: center; padding-bottom: 4px; cursor: pointer;
+            flex-shrink: 0;
         }
         .tube.skin-square { border-radius: 0 0 5px 5px; }
-        .tube.skin-cork::before { content: '🪵'; position: absolute; top: -18px; font-size: 0.8rem; }
-        .tube::before { content: ''; position: absolute; top: -5px; width: 54px; height: 7px; border: 4px solid #ffffff; border-radius: 3px; background: rgba(255, 255, 255, 0.6); }
-        .tube.selected { border-color: #facc15; box-shadow: 0 0 20px rgba(250, 204, 21, 1); }
-        .tube.completed { border-color: #22c55e; box-shadow: 0 0 15px rgba(34, 197, 94, 1); }
+        .tube.skin-cork::before { content: '🪵'; position: absolute; top: -16px; font-size: 0.8rem; }
+        .tube::before { content: ''; position: absolute; top: -4px; width: 50px; height: 6px; border: 3px solid rgba(255, 255, 255, 0.8); border-radius: 3px; background: rgba(255, 255, 255, 0.4); }
+        .tube.selected { border-color: #facc15; box-shadow: 0 0 15px rgba(250, 204, 21, 0.9); }
+        .tube.completed { border-color: #22c55e; box-shadow: 0 0 12px rgba(34, 197, 94, 0.8); }
 
         .ball {
-            width: 38px; height: 38px; border-radius: 50%; margin-top: 2px;
-            box-shadow: inset -4px -4px 8px rgba(0, 0, 0, 0.6), inset 4px 4px 8px rgba(255, 255, 255, 0.8), 0 3px 6px rgba(0, 0, 0, 0.5);
+            width: 34px; height: 34px; border-radius: 50%; margin-top: 2px;
+            box-shadow: inset -3px -3px 6px rgba(0, 0, 0, 0.5), inset 3px 3px 6px rgba(255, 255, 255, 0.6), 0 2px 4px rgba(0, 0, 0, 0.4);
             position: relative; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: bold;
+            flex-shrink: 0;
         }
-        .ball.floating { transform: translateY(-32px); animation: floatAnim 1.4s infinite ease-in-out alternate; }
-        @keyframes floatAnim { 0% { transform: translateY(-32px); } 100% { transform: translateY(-38px); } }
+        .ball.floating { transform: translateY(-30px); animation: floatAnim 1.4s infinite ease-in-out alternate; }
+        @keyframes floatAnim { 0% { transform: translateY(-30px); } 100% { transform: translateY(-36px); } }
 
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); justify-content: center; align-items: center; z-index: 100; }
         .modal.active { display: flex; }
@@ -297,7 +303,6 @@
     <script>
         const COLOR_PALETTE = ['#ef4444', '#3b82f6', '#22c55e', '#facc15', '#a855f7', '#ec4899', '#06b6d4', '#f97316', '#8b5cf6', '#10b981'];
 
-        // Incognito-sichere Speicher-Helfer
         function safeGet(key, fallback) {
             try {
                 let val = localStorage.getItem(key);
@@ -674,7 +679,7 @@
             const board = document.getElementById('game-board');
             if(!board) return;
             board.innerHTML = '';
-            let calculatedHeight = (maxTubeCapacity * 38) + 24;
+            let calculatedHeight = (maxTubeCapacity * 35) + 20;
 
             let tubeSkinObj = TUBE_SKINS.find(s => s.id === activeTubeSkin);
             let tubeExtraClass = tubeSkinObj ? tubeSkinObj.class : '';
