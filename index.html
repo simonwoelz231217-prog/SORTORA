@@ -8,7 +8,7 @@
     <style>
         :root {
             --bg-gradient: radial-gradient(circle at center, #1e62d0 0%, #082252 100%);
-            --glass-border: rgba(255, 255, 255, 0.4);
+            --glass-border: rgba(255, 255, 255, 0.5);
             --text-color: #ffffff;
             --gold-color: #facc15;
         }
@@ -18,7 +18,7 @@
         body {
             background: var(--bg-gradient); color: var(--text-color); min-height: 100vh;
             display: flex; flex-direction: column; align-items: center;
-            padding: 8px; overflow-x: hidden; transition: background 0.5s ease;
+            padding: 15px; overflow-x: hidden; transition: background 0.5s ease;
         }
 
         body.bg-lab { background: radial-gradient(circle at center, #1e62d0 0%, #082252 100%); }
@@ -26,129 +26,126 @@
         body.bg-neon { background: radial-gradient(circle at center, #831843 0%, #09090b 100%); }
         body.bg-dark { background: linear-gradient(180deg, #18181b 0%, #09090b 100%); }
 
-        header { text-align: center; width: 100%; max-width: 650px; position: relative; padding: 2px 0; flex-shrink: 0; }
-        .top-bar-btns { position: absolute; top: 2px; right: 5px; display: flex; gap: 6px; z-index: 10; }
+        header { text-align: center; width: 100%; max-width: 650px; position: relative; margin-bottom: 10px; }
+        .top-bar-btns { position: absolute; top: 0; right: 5px; display: flex; gap: 8px; z-index: 10; }
 
         .icon-btn {
             background: rgba(255, 255, 255, 0.25); border: 2px solid var(--glass-border); color: #fff;
-            width: 38px; height: 38px; border-radius: 50%; font-size: 1.1rem; cursor: pointer;
+            width: 42px; height: 42px; border-radius: 50%; font-size: 1.2rem; cursor: pointer;
             display: flex; align-items: center; justify-content: center;
         }
         .icon-btn:hover { background: var(--gold-color); color: #000; }
 
         .logo {
-            font-size: 2.4rem; font-weight: 900; letter-spacing: 2px; margin-bottom: 2px;
-            display: flex; justify-content: center; align-items: center; text-shadow: 0 3px 0 #0f172a;
+            font-size: 2.8rem; font-weight: 900; letter-spacing: 2px; margin-bottom: 5px;
+            display: flex; justify-content: center; align-items: center; text-shadow: 0 4px 0 #0f172a;
         }
         .l-s1 { color: #facc15; } .l-o1 { color: #06b6d4; } .l-r1 { color: #ec4899; }
         .l-t  { color: #f97316; } .l-o2 { color: #22c55e; } .l-r2 { color: #a855f7; } .l-a  { color: #3b82f6; }
 
-        /* WICHTIG: Scrollbar auf kleinen Handys, damit nichts abgeschnitten wird */
+        /* Natürlicher Layout-Fluss ohne künstliche Bremsen */
         .screen { 
-            display: none; width: 100%; max-width: 700px; flex-direction: column; align-items: center; justify-content: flex-start; flex: 1; padding: 4px 0;
-            overflow-y: auto; max-height: calc(100vh - 70px);
+            display: none; width: 100%; max-width: 700px; flex-direction: column; align-items: center; margin: 0 auto; padding-bottom: 20px;
         }
         .screen.active { display: flex; }
 
-        .mode-selection { display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 400px; margin-top: 10px; }
+        .mode-selection { display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 420px; margin-top: 15px; }
         .card-mode {
-            background: rgba(255, 255, 255, 0.15); border: 2px solid var(--glass-border); border-radius: 16px;
-            padding: 14px; cursor: pointer; box-shadow: 0 6px 15px rgba(0,0,0,0.3);
-            display: flex; flex-direction: column; gap: 4px;
+            background: rgba(255, 255, 255, 0.15); border: 2px solid var(--glass-border); border-radius: 18px;
+            padding: 16px; cursor: pointer; box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            display: flex; flex-direction: column; gap: 6px;
         }
         .card-mode:hover { background: rgba(255, 255, 255, 0.25); border-color: var(--gold-color); }
-        .card-title { font-size: 1.1rem; font-weight: 800; display: flex; justify-content: space-between; align-items: center; }
-        .card-stats { display: flex; justify-content: space-between; font-size: 0.8rem; color: #cbd5e1; background: rgba(0, 0, 0, 0.3); padding: 5px 10px; border-radius: 8px; }
+        .card-title { font-size: 1.2rem; font-weight: 800; display: flex; justify-content: space-between; align-items: center; }
+        .card-stats { display: flex; justify-content: space-between; font-size: 0.85rem; color: #cbd5e1; background: rgba(0, 0, 0, 0.3); padding: 6px 12px; border-radius: 10px; }
         .card-stats span { color: var(--gold-color); font-weight: bold; }
 
         .level-grid {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(55px, 1fr)); gap: 6px;
-            width: 100%; max-height: 65vh; overflow-y: auto; padding: 10px; background: rgba(8, 34, 82, 0.85);
-            border: 2px solid var(--glass-border); border-radius: 16px; margin-top: 8px;
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); gap: 8px;
+            width: 100%; max-height: 65vh; overflow-y: auto; padding: 12px; background: rgba(8, 34, 82, 0.9);
+            border: 2px solid var(--glass-border); border-radius: 18px; margin-top: 10px;
         }
         .level-btn {
-            background: rgba(255, 255, 255, 0.15); border: 2px solid var(--glass-border); border-radius: 12px;
+            background: rgba(255, 255, 255, 0.15); border: 2px solid var(--glass-border); border-radius: 14px;
             aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            font-size: 0.9rem; font-weight: 800; color: #fff; cursor: pointer;
+            font-size: 1rem; font-weight: 800; color: #fff; cursor: pointer;
         }
         .level-btn.unlocked { background: linear-gradient(135deg, #2563eb, #1d4ed8); border-color: #60a5fa; }
-        .level-btn.locked { opacity: 0.4; cursor: not-allowed; background: rgba(0, 0, 0, 0.4); }
-        .level-stars { font-size: 0.6rem; margin-top: 1px; color: var(--gold-color); }
+        .level-btn.locked { opacity: 0.4; cursor: not-allowed; background: rgba(0, 0, 0, 0.5); }
+        .level-stars { font-size: 0.65rem; margin-top: 2px; color: var(--gold-color); }
 
         .stats-bar {
             display: flex; justify-content: space-around; background: rgba(255, 255, 255, 0.2);
-            border: 2px solid var(--glass-border); padding: 6px 10px;
-            border-radius: 12px; margin-bottom: 4px; font-weight: 700; width: 100%; font-size: 0.85rem; flex-shrink: 0;
+            border: 2px solid var(--glass-border); padding: 8px 12px;
+            border-radius: 14px; margin-bottom: 8px; font-weight: 700; width: 100%; font-size: 0.9rem;
         }
-        .stat-item span { color: var(--gold-color); font-size: 0.95rem; }
+        .stat-item span { color: var(--gold-color); font-size: 1rem; }
         .timer-badge { color: #ef4444 !important; }
 
         .capacity-badge {
             display: inline-block; background: rgba(250, 204, 21, 0.25); border: 1px solid var(--gold-color);
-            color: var(--gold-color); padding: 2px 8px; border-radius: 8px; font-size: 0.7rem; font-weight: bold; margin-bottom: 2px; flex-shrink: 0;
+            color: var(--gold-color); padding: 4px 10px; border-radius: 10px; font-size: 0.75rem; font-weight: bold; margin-bottom: 6px;
         }
 
         .missions-card {
-            background: rgba(8, 34, 82, 0.85); border: 1px solid var(--glass-border); border-radius: 12px;
-            padding: 4px 10px; margin-bottom: 4px; text-align: left; width: 100%; font-size: 0.75rem; flex-shrink: 0;
+            background: rgba(8, 34, 82, 0.9); border: 1px solid var(--glass-border); border-radius: 14px;
+            padding: 8px 12px; margin-bottom: 8px; text-align: left; width: 100%; font-size: 0.8rem;
         }
-        .mission-item { display: flex; align-items: center; gap: 5px; margin: 1px 0; color: #e2e8f0; }
+        .mission-item { display: flex; align-items: center; gap: 6px; margin: 2px 0; color: #e2e8f0; }
         .mission-item.completed { color: #4ade80; font-weight: bold; }
 
-        .controls { display: flex; gap: 5px; margin: 4px 0; flex-wrap: wrap; justify-content: center; flex-shrink: 0; }
+        .controls { display: flex; gap: 6px; margin: 8px 0; flex-wrap: wrap; justify-content: center; }
         .btn {
             background: rgba(255, 255, 255, 0.22); border: 2px solid var(--glass-border); color: var(--text-color);
-            padding: 5px 10px; border-radius: 10px; cursor: pointer; font-weight: 700; font-size: 0.75rem;
+            padding: 6px 12px; border-radius: 12px; cursor: pointer; font-weight: 700; font-size: 0.8rem;
         }
         .btn:hover { background: #a855f7; border-color: #a855f7; }
         .btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-        .board-container { position: relative; display: flex; flex-direction: column; align-items: center; width: 100%; margin-top: 2px; flex-shrink: 0; }
-        .game-board { display: flex; flex-wrap: wrap; justify-content: center; align-content: center; gap: 10px 6px; width: 100%; min-height: 220px; padding: 5px; z-index: 2; flex-shrink: 0; }
-        .wood-table { width: 95%; height: 14px; background: linear-gradient(180deg, #d97706 0%, #b45309 60%, #78350f 100%); border-radius: 8px; border: 2px solid #f59e0b; margin-top: -5px; z-index: 1; flex-shrink: 0; }
+        .board-container { position: relative; display: flex; flex-direction: column; align-items: center; width: 100%; margin-top: 5px; }
+        .game-board { display: flex; flex-wrap: wrap; justify-content: center; align-content: center; gap: 15px 10px; width: 100%; min-height: 200px; padding: 10px; z-index: 2; }
+        .wood-table { width: 95%; height: 16px; background: linear-gradient(180deg, #d97706 0%, #b45309 60%, #78350f 100%); border-radius: 10px; border: 2px solid #f59e0b; margin-top: -6px; z-index: 1; }
 
-        /* EDLE GLAS-OPTIK (Ohne harte weiße Ränder) */
+        /* GARANTIERT SICHTBARE GLÄSER MIT FESTER HÖHE */
         .tube {
-            width: 44px; border: 3px solid rgba(255, 255, 255, 0.7); border-top: none;
-            border-radius: 0 0 20px 20px; background: rgba(255, 255, 255, 0.18);
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4), inset 0 0 10px rgba(255, 255, 255, 0.3);
-            position: relative; display: flex; flex-direction: column-reverse; align-items: center; padding-bottom: 4px; cursor: pointer;
-            flex-shrink: 0;
+            width: 50px; height: 190px; border: 3px solid rgba(255, 255, 255, 0.7); border-top: none;
+            border-radius: 0 0 24px 24px; background: rgba(255, 255, 255, 0.18);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5), inset 0 0 12px rgba(255, 255, 255, 0.3);
+            position: relative; display: flex; flex-direction: column-reverse; align-items: center; padding-bottom: 6px; cursor: pointer;
         }
-        .tube.skin-square { border-radius: 0 0 5px 5px; }
-        .tube.skin-cork::before { content: '🪵'; position: absolute; top: -16px; font-size: 0.8rem; }
-        .tube::before { content: ''; position: absolute; top: -4px; width: 50px; height: 6px; border: 3px solid rgba(255, 255, 255, 0.8); border-radius: 3px; background: rgba(255, 255, 255, 0.4); }
-        .tube.selected { border-color: #facc15; box-shadow: 0 0 15px rgba(250, 204, 21, 0.9); }
-        .tube.completed { border-color: #22c55e; box-shadow: 0 0 12px rgba(34, 197, 94, 0.8); }
+        .tube.skin-square { border-radius: 0 0 6px 6px; }
+        .tube.skin-cork::before { content: '🪵'; position: absolute; top: -18px; font-size: 0.9rem; }
+        .tube::before { content: ''; position: absolute; top: -5px; width: 56px; height: 7px; border: 3px solid rgba(255, 255, 255, 0.8); border-radius: 4px; background: rgba(255, 255, 255, 0.4); }
+        .tube.selected { border-color: #facc15; box-shadow: 0 0 20px rgba(250, 204, 21, 0.9); }
+        .tube.completed { border-color: #22c55e; box-shadow: 0 0 15px rgba(34, 197, 94, 0.8); }
 
         .ball {
-            width: 34px; height: 34px; border-radius: 50%; margin-top: 2px;
-            box-shadow: inset -3px -3px 6px rgba(0, 0, 0, 0.5), inset 3px 3px 6px rgba(255, 255, 255, 0.6), 0 2px 4px rgba(0, 0, 0, 0.4);
-            position: relative; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: bold;
-            flex-shrink: 0;
+            width: 40px; height: 40px; border-radius: 50%; margin-top: 3px;
+            box-shadow: inset -4px -4px 8px rgba(0, 0, 0, 0.5), inset 4px 4px 8px rgba(255, 255, 255, 0.6), 0 3px 6px rgba(0, 0, 0, 0.4);
+            position: relative; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; font-weight: bold;
         }
-        .ball.floating { transform: translateY(-30px); animation: floatAnim 1.4s infinite ease-in-out alternate; }
-        @keyframes floatAnim { 0% { transform: translateY(-30px); } 100% { transform: translateY(-36px); } }
+        .ball.floating { transform: translateY(-35px); animation: floatAnim 1.4s infinite ease-in-out alternate; }
+        @keyframes floatAnim { 0% { transform: translateY(-35px); } 100% { transform: translateY(-42px); } }
 
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); justify-content: center; align-items: center; z-index: 100; }
         .modal.active { display: flex; }
-        .modal-content { background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%); border: 3px solid var(--glass-border); padding: 18px; border-radius: 18px; text-align: center; max-width: 90%; width: 380px; max-height: 85vh; overflow-y: auto; }
+        .modal-content { background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%); border: 3px solid var(--glass-border); padding: 22px; border-radius: 20px; text-align: center; max-width: 90%; width: 400px; max-height: 85vh; overflow-y: auto; }
 
-        .shop-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin-top: 6px; }
-        .shop-card { background: rgba(255,255,255,0.1); border: 2px solid var(--glass-border); padding: 6px; border-radius: 10px; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+        .shop-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 8px; }
+        .shop-card { background: rgba(255,255,255,0.1); border: 2px solid var(--glass-border); padding: 8px; border-radius: 12px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
         .shop-card.owned { border-color: #22c55e; }
         .shop-card.active-skin { border-color: var(--gold-color); background: rgba(250, 204, 21, 0.25); }
 
-        .achieve-item { background: rgba(255,255,255,0.1); border: 1px solid var(--glass-border); border-radius: 8px; padding: 6px; margin: 4px 0; text-align: left; display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; }
+        .achieve-item { background: rgba(255,255,255,0.1); border: 1px solid var(--glass-border); border-radius: 10px; padding: 8px; margin: 6px 0; text-align: left; display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; }
         .achieve-item.completed { border-color: #22c55e; color: #4ade80; }
 
-        .stars-container { display: flex; justify-content: center; gap: 8px; margin: 10px 0; height: 45px; align-items: center; }
-        .star-item { font-size: 2.4rem; opacity: 0; transform: scale(0); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .stars-container { display: flex; justify-content: center; gap: 10px; margin: 12px 0; height: 50px; align-items: center; }
+        .star-item { font-size: 2.8rem; opacity: 0; transform: scale(0); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .star-item.pop { opacity: 1; transform: scale(1); }
         .star-item.grey { filter: grayscale(1) opacity(0.3); }
 
-        .bg-options { display: grid; grid-template-columns: repeat(2, 1fr); gap: 5px; margin-top: 5px; }
-        .bg-btn { background: rgba(255,255,255,0.15); border: 2px solid var(--glass-border); color: #fff; padding: 5px; border-radius: 6px; cursor: pointer; font-size: 0.7rem; font-weight: bold; }
+        .bg-options { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin-top: 6px; }
+        .bg-btn { background: rgba(255,255,255,0.15); border: 2px solid var(--glass-border); color: #fff; padding: 6px; border-radius: 8px; cursor: pointer; font-size: 0.75rem; font-weight: bold; }
         .bg-btn.active { border-color: var(--gold-color); background: rgba(250, 204, 21, 0.25); }
 
         #fx-canvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 99; }
@@ -186,7 +183,7 @@
                     <div><span id="txt-lbl-stars2">Sterne:</span> <span id="menu-timer-stars">0</span> ⭐</div>
                 </div>
             </div>
-            <button class="btn" style="background:linear-gradient(90deg, #ec4899, #8b5cf6); padding:8px; font-size:0.85rem;" onclick="watchRewardedAd()">
+            <button class="btn" style="background:linear-gradient(90deg, #ec4899, #8b5cf6); padding:10px; font-size:0.9rem;" onclick="watchRewardedAd()">
                 📺 +50 Bonus-Sterne (Werbung)
             </button>
         </div>
@@ -194,10 +191,10 @@
 
     <!-- LEVEL MAP -->
     <div class="screen" id="level-map">
-        <div style="display:flex; justify-content:space-between; width:100%; align-items:center; margin-bottom:6px;">
+        <div style="display:flex; justify-content:space-between; width:100%; align-items:center; margin-bottom:8px;">
             <button class="btn" onclick="showMainMenu()"><span id="txt-btn-back">⬅️ Menü</span></button>
-            <h3 id="mode-title" style="font-size: 1rem;">Klassischer Modus</h3>
-            <div style="font-weight:bold; color:var(--gold-color); font-size:0.9rem;" id="map-stars-total">0 ⭐</div>
+            <h3 id="mode-title">Klassischer Modus</h3>
+            <div style="font-weight:bold; color:var(--gold-color);" id="map-stars-total">0 ⭐</div>
         </div>
         <div class="level-grid" id="level-grid"></div>
     </div>
@@ -214,7 +211,7 @@
         <div><span class="capacity-badge" id="capacity-badge">🧪 Glas: 4 Bälle</span></div>
 
         <div class="missions-card" id="missions-card">
-            <div style="font-weight:bold; margin-bottom:1px; color:#93c5fd;" id="txt-lbl-missions">🎯 Missionen</div>
+            <div style="font-weight:bold; margin-bottom:2px; color:#93c5fd;" id="txt-lbl-missions">🎯 Missionen</div>
             <div class="mission-item" id="m1"><span class="mission-icon">⚪</span> <span id="txt-m1">Level lösen</span></div>
             <div class="mission-item" id="m2"><span class="mission-icon">⚪</span> <span id="m2-text">Unter X Zügen bleiben</span></div>
             <div class="mission-item" id="m3"><span class="mission-icon">⚪</span> <span id="txt-m3">Kein Extra-Glas benutzen</span></div>
@@ -238,36 +235,36 @@
     <div class="modal" id="shop-modal">
         <div class="modal-content">
             <h2 style="color:var(--gold-color);">🛒 Skin-Shop</h2>
-            <p style="margin-bottom:6px;">Guthaben: <span id="shop-stars-balance" style="color:var(--gold-color); font-weight:bold;">0</span> ⭐</p>
-            <h3 style="margin-top:3px; font-size:0.85rem; text-align:left;">🔮 Ball-Skins</h3>
+            <p style="margin-bottom:8px;">Guthaben: <span id="shop-stars-balance" style="color:var(--gold-color); font-weight:bold;">0</span> ⭐</p>
+            <h3 style="margin-top:4px; font-size:0.9rem; text-align:left;">🔮 Ball-Skins</h3>
             <div class="shop-grid" id="ball-skins-grid"></div>
-            <h3 style="margin-top:8px; font-size:0.85rem; text-align:left;">🧪 Glas-Skins</h3>
+            <h3 style="margin-top:10px; font-size:0.9rem; text-align:left;">🧪 Glas-Skins</h3>
             <div class="shop-grid" id="tube-skins-grid"></div>
-            <button class="btn" style="width:100%; margin-top:10px; background:#22c55e;" onclick="closeShop()">Schließen</button>
+            <button class="btn" style="width:100%; margin-top:12px; background:#22c55e;" onclick="closeShop()">Schließen</button>
         </div>
     </div>
 
     <div class="modal" id="achieve-modal">
         <div class="modal-content">
             <h2 style="color:var(--gold-color);">🏆 Erfolge</h2>
-            <div id="achievements-list" style="margin-top:6px;"></div>
-            <button class="btn" style="width:100%; margin-top:10px; background:#22c55e;" onclick="closeAchievements()">Schließen</button>
+            <div id="achievements-list" style="margin-top:8px;"></div>
+            <button class="btn" style="width:100%; margin-top:12px; background:#22c55e;" onclick="closeAchievements()">Schließen</button>
         </div>
     </div>
 
     <div class="modal" id="settings-modal">
         <div class="modal-content">
             <h2 style="color:var(--gold-color);" id="txt-settings-title">⚙️ Einstellungen</h2>
-            <div style="margin:8px 0; display:flex; justify-content:space-between; align-items:center;">
+            <div style="margin:10px 0; display:flex; justify-content:space-between; align-items:center;">
                 <span id="txt-lbl-sound">🔊 Sound & Musik</span>
                 <button class="btn" id="sound-toggle-btn" onclick="toggleSound()">AN / ON</button>
             </div>
-            <div style="margin:8px 0; display:flex; justify-content:space-between; align-items:center;">
+            <div style="margin:10px 0; display:flex; justify-content:space-between; align-items:center;">
                 <span id="txt-lbl-lang">🌐 Sprache / Language</span>
                 <button class="btn" id="lang-btn" onclick="toggleLanguage()">DE 🇩🇪</button>
             </div>
-            <div style="text-align:left; margin-top:6px;">
-                <span style="font-weight:bold; font-size:0.8rem;" id="txt-lbl-bg">🎨 Hintergrund:</span>
+            <div style="text-align:left; margin-top:8px;">
+                <span style="font-weight:bold; font-size:0.85rem;" id="txt-lbl-bg">🎨 Hintergrund:</span>
                 <div class="bg-options">
                     <button class="bg-btn active" onclick="setBgTheme('bg-lab')" id="bg-btn-lab">Labor</button>
                     <button class="bg-btn" onclick="setBgTheme('bg-magic')" id="bg-btn-magic">Magisch</button>
@@ -275,28 +272,28 @@
                     <button class="bg-btn" onclick="setBgTheme('bg-dark')" id="bg-btn-dark">Dunkel</button>
                 </div>
             </div>
-            <button class="btn" style="width:100%; margin-top:10px; background:#22c55e;" onclick="closeSettings()"><span id="txt-btn-close">Schließen</span></button>
+            <button class="btn" style="width:100%; margin-top:12px; background:#22c55e;" onclick="closeSettings()"><span id="txt-btn-close">Schließen</span></button>
         </div>
     </div>
 
     <div class="modal" id="win-modal">
         <div class="modal-content">
-            <h2 id="txt-win-title" style="font-size: 1.2rem;">SORTORA Meister! 🎉</h2>
+            <h2 id="txt-win-title">SORTORA Meister! 🎉</h2>
             <div class="stars-container">
                 <div class="star-item" id="star-1">⭐</div>
                 <div class="star-item" id="star-2">⭐</div>
                 <div class="star-item" id="star-3">⭐</div>
             </div>
-            <div id="win-missions-list" style="margin-bottom:10px; font-size:0.8rem;"></div>
-            <button class="btn" style="width:100%; background:#22c55e; font-weight:800; padding:8px;" onclick="nextLevel()"><span id="txt-btn-next">Nächstes Level ➔</span></button>
+            <div id="win-missions-list" style="margin-bottom:12px; font-size:0.85rem;"></div>
+            <button class="btn" style="width:100%; background:#22c55e; font-weight:800; padding:10px;" onclick="nextLevel()"><span id="txt-btn-next">Nächstes Level ➔</span></button>
         </div>
     </div>
 
     <div class="modal" id="lose-modal">
         <div class="modal-content">
-            <h2 style="color:#ef4444; font-size: 1.2rem;" id="txt-lose-title">Zeit Abgelaufen! ⏰</h2>
-            <p style="margin:10px 0; font-size: 0.85rem;" id="txt-lose-desc">Versuche es noch einmal schneller!</p>
-            <button class="btn" style="background:#3b82f6; width:100%; padding:8px;" onclick="restartLevel(); document.getElementById('lose-modal').classList.remove('active');"><span id="txt-btn-tryagain">🔄 Nochmal versuchen</span></button>
+            <h2 style="color:#ef4444;" id="txt-lose-title">Zeit Abgelaufen! ⏰</h2>
+            <p style="margin:12px 0;" id="txt-lose-desc">Versuche es noch einmal schneller!</p>
+            <button class="btn" style="background:#3b82f6; width:100%; padding:10px;" onclick="restartLevel(); document.getElementById('lose-modal').classList.remove('active');"><span id="txt-btn-tryagain">🔄 Nochmal versuchen</span></button>
         </div>
     </div>
 
@@ -423,9 +420,9 @@
                 let isActive = activeBallSkin === skin.id;
                 bGrid.innerHTML += `
                     <div class="shop-card ${isOwned ? 'owned' : ''} ${isActive ? 'active-skin' : ''}">
-                        <div style="font-size:1.1rem;">${skin.icon}</div>
-                        <div style="font-size:0.7rem; font-weight:bold;">${skin.name}</div>
-                        ${isActive ? '<span style="color:var(--gold-color); font-size:0.65rem;">Aktiv</span>' : 
+                        <div style="font-size:1.2rem;">${skin.icon}</div>
+                        <div style="font-size:0.75rem; font-weight:bold;">${skin.name}</div>
+                        ${isActive ? '<span style="color:var(--gold-color); font-size:0.7rem;">Aktiv</span>' : 
                           isOwned ? `<button class="btn" onclick="equipBallSkin('${skin.id}')">Wählen</button>` :
                           `<button class="btn" style="background:#22c55e;" onclick="buySkin('${skin.id}', ${skin.price})">${skin.price} ⭐</button>`}
                     </div>`;
@@ -438,8 +435,8 @@
                 let isActive = activeTubeSkin === skin.id;
                 tGrid.innerHTML += `
                     <div class="shop-card ${isOwned ? 'owned' : ''} ${isActive ? 'active-skin' : ''}">
-                        <div style="font-size:0.7rem; font-weight:bold;">${skin.name}</div>
-                        ${isActive ? '<span style="color:var(--gold-color); font-size:0.65rem;">Aktiv</span>' : 
+                        <div style="font-size:0.75rem; font-weight:bold;">${skin.name}</div>
+                        ${isActive ? '<span style="color:var(--gold-color); font-size:0.7rem;">Aktiv</span>' : 
                           isOwned ? `<button class="btn" onclick="equipTubeSkin('${skin.id}')">Wählen</button>` :
                           `<button class="btn" style="background:#22c55e;" onclick="buySkin('${skinKey}', ${skin.price})">${skin.price} ⭐</button>`}
                     </div>`;
@@ -679,7 +676,6 @@
             const board = document.getElementById('game-board');
             if(!board) return;
             board.innerHTML = '';
-            let calculatedHeight = (maxTubeCapacity * 35) + 20;
 
             let tubeSkinObj = TUBE_SKINS.find(s => s.id === activeTubeSkin);
             let tubeExtraClass = tubeSkinObj ? tubeSkinObj.class : '';
@@ -687,7 +683,6 @@
             tubesData.forEach((tube, tubeIndex) => {
                 const tubeDiv = document.createElement('div');
                 tubeDiv.className = `tube ${tubeExtraClass}`;
-                tubeDiv.style.height = `${calculatedHeight}px`;
 
                 if (selectedTubeIndex === tubeIndex) tubeDiv.classList.add('selected');
                 let isComplete = tube.length === maxTubeCapacity && tube.every(color => color === tube[0]);
