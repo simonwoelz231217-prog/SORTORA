@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SORTORA - Color Sorting Puzzle</title>
+    <script src="https://sdk.crazygames.com/crazygames-sdk-v3.js"></script>
+    <style>
+        :root {
+            --bg-gradient: radial-gradient(circle at center, #1e62d0 0%, #082252 100%);
+            --glass-bg: rgba(255, 255, 255, 0.12);
+            --glass-border: rgba(255, 255, 255, 0.35);
+            --text-color: #ffffff;
+            --gold-color: #facc15;
+        }
+
+        * { box-sizing: border-box; user-select: none; -webkit-user-select: none; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+
+        body {
+            background: var(--bg-gradient); color: var(--text-color); min-height: 100vh;
+            display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+            padding: 12px 10px; overflow-x: hidden; transition: background 0.5s ease;
+        }
+
+        body.bg-lab { background: radial-gradient(circle at center, #1e62d0 0%, #082252 100%); }
+        body.bg-magic { background: radial-gradient(circle at center, #4c1d95 0%, #0f172a 100%); }
+        body.bg-neon { background: radial-gradient(circle at center, #831843 0%, #09090b 100%); }
+        body.bg-dark { background: linear-gradient(180deg, #18181b 0%, #09090b 100%); }
+
+        header { text-align: center; width: 100%; max-width: 650px; position: relative; }
+        .top-bar-btns { position: absolute; top: 0; right: 10px; display: flex; gap: 8px; z-index: 10; }
+
+        .icon-btn {
+            background: rgba(255, 255, 255, 0.2); border: 2px solid var(--glass-border); color: #fff;
+            width: 42px; height: 42px; border-radius: 50%; font-size: 1.2rem; cursor: pointer;
+            backdrop-filter: blur(8px); transition: transform 0.2s; display: flex; align-items: center; justify-content: center;
+        }
+        .icon-btn:hover { transform: scale(1.1); background: var(--gold-color); color: #000; }
+
+        .logo {
+            font-size: 3rem; font-weight: 900; letter-spacing: 3px; margin-bottom: 5px;
+            display: flex; justify-content: center; align-items: center; text-shadow: 0 6px 0 #0f172a, 0 10px 20px rgba(0,0,0,0.5);
+        }
+        .l-s1 { color: #facc15; } .l-o1 { color: #06b6d4; } .l-r1 { color: #ec4899; }
+        .l-t  { color: #f97316; } .l-o2 { color: #22c55e; } .l-r2 { color: #a855f7; } .l-a  { color: #3b82f6; }
+
+        .screen { display: none; width: 100%; max-width: 700px; flex-direction: column; align-items: center; margin: auto 0; }
+        .screen.active { display: flex; }
+
+        .mode-selection { display: flex; flex-direction: column; gap: 15px; width: 100%; max-width: 420px; margin-top: 15px; }
+        .card-mode {
+            background: rgba(255, 255, 255, 0.12); border: 2px solid var(--glass-border); border-radius: 20px;
+            padding: 18px; cursor: pointer; backdrop-filter: blur(12px); box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            transition: all 0.2s; display: flex; flex-direction: column; gap: 8px;
+        }
+        .card-mode:hover { background: rgba(255, 255, 255, 0.22); transform: translateY(-3px); border-color: var(--gold-color); }
+        .card-title { font-size: 1.25rem; font-weight: 800; display: flex; justify-content: space-between; align-items: center; }
+        .card-stats { display: flex; justify-content: space-between; font-size: 0.88rem; color: #cbd5e1; background: rgba(0, 0, 0, 0.25); padding: 8px 14px; border-radius: 12px; }
+        .card-stats span { color: var(--gold-color); font-weight: bold; }
+
+        .level-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 10px;
+            width: 100%; max-height: 52vh; overflow-y: auto; padding: 15px; background: rgba(8, 34, 82, 0.6);
+            border: 2px solid var(--glass-border); border-radius: 20px; backdrop-filter: blur(12px); margin-top: 15px;
+        }
+        .level-btn {
+            background: rgba(255, 255, 255, 0.1); border: 2px solid var(--glass-border); border-radius: 16px;
+            aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            font-size: 1rem; font-weight: 800; color: #fff; cursor: pointer; transition: all 0.2s;
+        }
+        .level-btn.unlocked { background: linear-gradient(135deg, #2563eb, #1d4ed8); border-color: #60a5fa; }
+        .level-btn.unlocked:hover { transform: scale(1.08); background: #3b82f6; }
+        .level-btn.locked { opacity: 0.4; cursor: not-allowed; background: rgba(0, 0, 0, 0.3); }
+        .level-stars { font-size: 0.7rem; margin-top: 2px; color: var(--gold-color); }
+
+        .stats-bar {
+            display: flex; justify-content: space-around; background: rgba(255, 255, 255, 0.15);
+            border: 2px solid var(--glass-border); backdrop-filter: blur(12px); padding: 8px 16px;
+            border-radius: 18px; margin-top: 8px; font-weight: 700; width: 100%;
+        }
+        .stat-item span { color: var(--gold-color); font-size: 1.1rem; }
+        .timer-badge { color: #ef4444 !important; animation: pulse 1s infinite alternate; }
+        @keyframes pulse { 0% { transform: scale(1); } 100% { transform: scale(1.1); } }
+
+        .capacity-badge {
+            display: inline-block; background: rgba(250, 204, 21, 0.2); border: 1px solid var(--gold-color);
+            color: var(--gold-color); padding: 4px 12px; border-radius: 12px; font-size: 0.8rem; font-weight: bold; margin-top: 6px;
+        }
+
+        .missions-card {
+            background: rgba(8, 34, 82, 0.7); border: 1px solid var(--glass-border); border-radius: 16px;
+            padding: 8px 14px; margin-top: 8px; backdrop-filter: blur(10px); text-align: left; width: 100%; font-size: 0.85rem;
+        }
+        .mission-item { display: flex; align-items: center; gap: 8px; margin: 3px 0; color: #e2e8f0; }
+        .mission-item.completed { color: #4ade80; font-weight: bold; }
+
+        .controls { display: flex; gap: 8px; margin: 10px 0; flex-wrap: wrap; justify-content: center; }
+        .btn {
+            background: rgba(255, 255, 255, 0.18); border: 2px solid var(--glass-border); color: var(--text-color);
+            padding: 8px 14px; border-radius: 14px; cursor: pointer; font-weight: 700; font-size: 0.85rem; transition: all 0.2s;
+        }
+        .btn:hover { background: #a855f7; border-color: #a855f7; transform: translateY(-2px); }
+        .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; }
+
+        .board-container { position: relative; display: flex; flex-direction: column; align-items: center; margin: auto 0; width: 100%; max-width: 900px; }
+        .game-board { display: flex; flex-wrap: wrap; justify-content: center; align-content: center; gap: 20px 14px; width: 100%; min-height: 220px; padding: 15px 10px 10px 10px; z-index: 2; }
+        .wood-table { width: 95%; height: 22px; background: linear-gradient(180deg, #d97706 0%, #b45309 60%, #78350f 100%); border-radius: 12px; border: 2px solid #f59e0b; margin-top: -10px; z-index: 1; }
+
+        /* REAGENZGLÄSER & BÄLLE */
+        .tube {
+            width: 58px; border: 3px solid rgba(255, 255, 255, 0.5); border-top: none;
+            border-radius: 0 0 28px 28px; background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(8px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35), inset 0 0 18px rgba(255, 255, 255, 0.2);
+            position: relative; display: flex; flex-direction: column-reverse; align-items: center; padding-bottom: 6px; cursor: pointer; transition: all 0.2s;
+        }
+        .tube.skin-square { border-radius: 0 0 8px 8px; }
+        .tube.skin-cork::before { content: '🪵'; position: absolute; top: -22px; font-size: 1.1rem; }
+        .tube::before { content: ''; position: absolute; top: -7px; width: 64px; height: 9px; border: 3px solid rgba(255, 255, 255, 0.7); border-radius: 5px; background: rgba(255, 255, 255, 0.3); }
+        .tube.selected { border-color: #facc15; box-shadow: 0 0 25px rgba(250, 204, 21, 0.8); }
+        .tube.completed { border-color: #22c55e; box-shadow: 0 0 20px rgba(34, 197, 94, 0.7); }
+
+        .ball {
+            width: 44px; height: 44px; border-radius: 50%; margin-top: 2px;
+            box-shadow: inset -5px -5px 10px rgba(0, 0, 0, 0.5), inset 5px 5px 10px rgba(255, 255, 255, 0.6), 0 4px 8px rgba(0, 0, 0, 0.4);
+            transition: transform 0.2s ease-out; position: relative;
+            display: flex; align-items: center; justify-content: center; font-size: 1.1rem; font-weight: bold;
+        }
+        .ball.floating { transform: translateY(-45px); animation: floatAnim 1.4s infinite ease-in-out alternate; }
+        @keyframes floatAnim { 0% { transform: translateY(-45px); } 100% { transform: translateY(-52px); } }
+
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(10px); justify-content: center; align-items: center; z-index: 100; opacity: 0; transition: opacity 0.3s ease; }
+        .modal.active { display: flex; opacity: 1; }
+        .modal-content { background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%); border: 3px solid var(--glass-border); padding: 25px 28px; border-radius: 26px; text-align: center; max-width: 90%; width: 420px; max-height: 85vh; overflow-y: auto; }
+
+        .shop-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 10px; }
+        .shop-card { background: rgba(255,255,255,0.08); border: 2px solid var(--glass-border); padding: 10px; border-radius: 16px; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+        .shop-card.owned { border-color: #22c55e; }
+        .shop-card.active-skin { border-color: var(--gold-color); background: rgba(250, 204, 21, 0.2); }
+
+        .achieve-item { background: rgba(255,255,255,0.08); border: 1px solid var(--glass-border); border-radius: 14px; padding: 10px; margin: 8px 0; text-align: left; display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; }
+        .achieve-item.completed { border-color: #22c55e; color: #4ade80; }
+
+        .stars-container { display: flex; justify-content: center; gap: 12px; margin: 15px 0; height: 60px; align-items: center; }
+        .star-item { font-size: 3.2rem; opacity: 0; transform: scale(0); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .star-item.pop { opacity: 1; transform: scale(1); }
+        .star-item.grey { filter: grayscale(1) opacity(0.3); }
+
+        .bg-options { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 8px; }
+        .bg-btn { background: rgba(255,255,255,0.1); border: 2px solid var(--glass-border); color: #fff; padding: 8px; border-radius: 10px; cursor: pointer; font-size: 0.8rem; font-weight: bold; }
+        .bg-btn.active { border-color: var(--gold-color); background: rgba(250, 204, 21, 0.2); }
+
+        #fx-canvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 99; }
+    </style>
+</head>
+<body class="bg-lab">
+
+    <canvas id="fx-canvas"></canvas>
+
+    <header>
+        <div class="top-bar-btns">
+            <button class="icon-btn" onclick="openShop()">🛒</button>
+            <button class="icon-btn" onclick="openAchievements()">🏆</button>
+            <button class="icon-btn" onclick="openSettings()">⚙️</button>
+        </div>
+        <div class="logo">
+            <span class="l-s1">S</span><span class="l-o1">O</span><span class="l-r1">R</span><span class="l-t">T</span><span class="l-o2">O</span><span class="l-r2">R</span><span class="l-a">A</span>
+        </div>
+    </header>
+
+    <!-- MAIN MENU -->
+    <div class="screen active" id="main-menu">
+        <div class="mode-selection">
+            <div class="card-mode" onclick="showLevelMap('classic')">
+                <div class="card-title"><span id="txt-mode-classic">🎮 Klassisch</span><span>➔</span></div>
+                <div class="card-stats">
+                    <div><span id="txt-lbl-lvl">Level:</span> <span id="menu-classic-lvl">1</span>/200</div>
+                    <div><span id="txt-lbl-stars">Sterne:</span> <span id="menu-classic-stars">0</span> ⭐</div>
+                </div>
+            </div>
+            <div class="card-mode" onclick="showLevelMap('timer')">
+                <div class="card-title"><span id="txt-mode-timer">⏱️ Zeitmodus</span><span>➔</span></div>
+                <div class="card-stats">
+                    <div><span id="txt-lbl-lvl2">Level:</span> <span id="menu-timer-lvl">1</span>/200</div>
+                    <div><span id="txt-lbl-stars2">Sterne:</span> <span id="menu-timer-stars">0</span> ⭐</div>
+                </div>
+            </div>
+            <button class="btn" style="background:linear-gradient(90deg, #ec4899, #8b5cf6); padding:12px; font-size:0.95rem;" onclick="watchRewardedAd()">
+                📺 +50 Bonus-Sterne (Werbung)
+            </button>
+        </div>
+    </div>
+
+    <!-- LEVEL MAP -->
+    <div class="screen" id="level-map">
+        <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
+            <button class="btn" onclick="showMainMenu()"><span id="txt-btn-back">⬅️ Menü</span></button>
+            <h3 id="mode-title">Klassischer Modus</h3>
+            <div style="font-weight:bold; color:var(--gold-color);" id="map-stars-total">0 ⭐</div>
+        </div>
+        <div class="level-grid" id="level-grid"></div>
+    </div>
+
+    <!-- INGAME SPIELFELD -->
+    <div class="screen" id="game-screen">
+        <div class="stats-bar">
+            <div class="stat-item">Level: <span id="level-num">1</span></div>
+            <div class="stat-item"><span id="txt-lbl-moves">Züge</span>: <span id="moves-num">0</span></div>
+            <div class="stat-item" id="timer-box" style="display:none;"><span id="txt-lbl-time">Zeit</span>: <span id="time-left" class="timer-badge">60</span>s</div>
+            <div class="stat-item"><span id="txt-lbl-stars3">Sterne</span>: <span id="stars-total">0</span> ⭐</div>
+        </div>
+
+        <div><span class="capacity-badge" id="capacity-badge">🧪 Glas: 4 Bälle</span></div>
+
+        <div class="missions-card" id="missions-card">
+            <div style="font-weight:bold; margin-bottom:4px; color:#93c5fd;" id="txt-lbl-missions">🎯 Missionen</div>
+            <div class="mission-item" id="m1"><span class="mission-icon">⚪</span> <span id="txt-m1">Level lösen</span></div>
+            <div class="mission-item" id="m2"><span class="mission-icon">⚪</span> <span id="m2-text">Unter X Zügen bleiben</span></div>
+            <div class="mission-item" id="m3"><span class="mission-icon">⚪</span> <span id="txt-m3">Kein Extra-Glas benutzen</span></div>
+        </div>
+
+        <div class="controls">
+            <button class="btn" onclick="showLevelMap(gameMode)"><span id="txt-btn-map">🏠 Karte</span></button>
+            <button class="btn" id="undo-btn" onclick="undoMove()" disabled><span id="txt-btn-undo">↩️ Rückgängig</span></button>
+            <button class="btn" onclick="shuffleTubes()">🔀 Mischen</button>
+            <button class="btn" id="add-tube-btn" onclick="addExtraTube()"><span id="txt-btn-tube">🧪 +1 Glas</span></button>
+            <button class="btn" onclick="restartLevel()"><span id="txt-btn-restart">🔄 Neustart</span></button>
+        </div>
+
+        <div class="board-container">
+            <div class="game-board" id="game-board"></div>
+            <div class="wood-table"></div>
+        </div>
+    </div>
+
+    <!-- MODALS -->
+    <div class="modal" id="shop-modal">
+        <div class="modal-content">
+            <h2 style="color:var(--gold-color);">🛒 Skin-Shop</h2>
+            <p style="margin-bottom:10px;">Guthaben: <span id="shop-stars-balance" style="color:var(--gold-color); font-weight:bold;">0</span> ⭐</p>
+            <h3 style="margin-top:5px; font-size:0.95rem; text-align:left;">🔮 Ball-Skins</h3>
+            <div class="shop-grid" id="ball-skins-grid"></div>
+            <h3 style="margin-top:12px; font-size:0.95rem; text-align:left;">🧪 Glas-Skins</h3>
+            <div class="shop-grid" id="tube-skins-grid"></div>
+            <button class="btn" style="width:100%; margin-top:15px; background:#22c55e;" onclick="closeShop()">Schließen</button>
+        </div>
+    </div>
+
+    <div class="modal" id="achieve-modal">
+        <div class="modal-content">
+            <h2 style="color:var(--gold-color);">🏆 Erfolge</h2>
+            <div id="achievements-list" style="margin-top:10px;"></div>
+            <button class="btn" style="width:100%; margin-top:15px; background:#22c55e;" onclick="closeAchievements()">Schließen</button>
+        </div>
+    </div>
+
+    <div class="modal" id="settings-modal">
+        <div class="modal-content">
+            <h2 style="color:var(--gold-color);" id="txt-settings-title">⚙️ Einstellungen</h2>
+            <div style="margin:12px 0; display:flex; justify-content:space-between; align-items:center;">
+                <span id="txt-lbl-sound">🔊 Sound & Musik</span>
+                <button class="btn" id="sound-toggle-btn" onclick="toggleSound()">AN / ON</button>
+            </div>
+            <div style="margin:12px 0; display:flex; justify-content:space-between; align-items:center;">
+                <span id="txt-lbl-lang">🌐 Sprache / Language</span>
+                <button class="btn" id="lang-btn" onclick="toggleLanguage()">DE 🇩🇪</button>
+            </div>
+            <div style="text-align:left; margin-top:10px;">
+                <span style="font-weight:bold; font-size:0.9rem;" id="txt-lbl-bg">🎨 Hintergrund:</span>
+                <div class="bg-options">
+                    <button class="bg-btn active" onclick="setBgTheme('bg-lab')" id="bg-btn-lab">Labor</button>
+                    <button class="bg-btn" onclick="setBgTheme('bg-magic')" id="bg-btn-magic">Magisch</button>
+                    <button class="bg-btn" onclick="setBgTheme('bg-neon')" id="bg-btn-neon">Neon</button>
+                    <button class="bg-btn" onclick="setBgTheme('bg-dark')" id="bg-btn-dark">Dunkel</button>
+                </div>
+            </div>
+            <button class="btn" style="width:100%; margin-top:15px; background:#22c55e;" onclick="closeSettings()"><span id="txt-btn-close">Schließen</span></button>
+        </div>
+    </div>
+
+    <div class="modal" id="win-modal">
+        <div class="modal-content">
+            <h2 id="txt-win-title">SORTORA Meister! 🎉</h2>
+            <div class="stars-container">
+                <div class="star-item" id="star-1">⭐</div>
+                <div class="star-item" id="star-2">⭐</div>
+                <div class="star-item" id="star-3">⭐</div>
+            </div>
+            <div id="win-missions-list" style="margin-bottom:15px; font-size:0.9rem;"></div>
+            <button class="btn" style="width:100%; background:#22c55e; font-weight:800; padding:12px;" onclick="nextLevel()"><span id="txt-btn-next">Nächstes Level ➔</span></button>
+        </div>
+    </div>
+
+    <div class="modal" id="lose-modal">
+        <div class="modal-content">
+            <h2 style="color:#ef4444;" id="txt-lose-title">Zeit Abgelaufen! ⏰</h2>
+            <p style="margin:15px 0;" id="txt-lose-desc">Versuche es noch einmal schneller!</p>
+            <button class="btn" style="background:#3b82f6; width:100%; padding:12px;" onclick="restartLevel(); document.getElementById('lose-modal').classList.remove('active');"><span id="txt-btn-tryagain">🔄 Nochmal versuchen</span></button>
+        </div>
+    </div>
+
+    <script>
+        const COLOR_PALETTE = ['#ef4444', '#3b82f6', '#22c55e', '#facc15', '#a855f7', '#ec4899', '#06b6d4', '#f97316', '#8b5cf6', '#10b981'];
+
+        let gameMode = 'classic';
+        let currentLevel = 1;
+        let soundEnabled = localStorage.getItem('sortora_sound') !== 'false';
+        let currentLang = localStorage.getItem('sortora_lang') || 'de';
+        let currentBgTheme = localStorage.getItem('sortora_bg') || 'bg-lab';
+
+        let classicUnlocked = parseInt(localStorage.getItem('sortora_classic_unlocked')) || 1;
+        let classicStarsData = JSON.parse(localStorage.getItem('sortora_classic_stars')) || {};
+        let timerUnlocked = parseInt(localStorage.getItem('sortora_timer_unlocked')) || 1;
+        let timerStarsData = JSON.parse(localStorage.getItem('sortora_timer_stars')) || {};
+
+        let userStars = parseInt(localStorage.getItem('sortora_currency_stars')) || 0;
+        let activeBallSkin = localStorage.getItem('sortora_active_ball') || 'default';
+        let activeTubeSkin = localStorage.getItem('sortora_active_tube') || 'default';
+        let ownedSkins = JSON.parse(localStorage.getItem('sortora_owned_skins')) || ['default', 'tube_default'];
+
+        let tubesData = [], completedTubesState = [], selectedTubeIndex = null, moves = 0, moveHistory = [];
+        let maxTubeCapacity = 4, extraTubeAdded = false, maxAllowedMoves = 15;
+        let timeLeft = 60, timerInterval = null;
+
+        const translations = {
+            de: {
+                classicMode: "🎮 Klassisch", timerMode: "⏱️ Zeitmodus", level: "Level", stars: "Sterne", back: "⬅️ Menü",
+                moves: "Züge", time: "Zeit", missions: "🎯 Missionen", m1: "Level lösen", m2: "Unter {moves} Zügen bleiben",
+                m3: "Kein Extra-Glas benutzen", btnMap: "🏠 Karte", btnUndo: "↩️ Rückgängig", btnTube: "🧪 +1 Glas",
+                btnRestart: "🔄 Neustart", settingsTitle: "⚙️ Einstellungen", soundLbl: "🔊 Sound & Musik", langLbl: "🌐 Sprache / Language",
+                bgLbl: "🎨 Hintergrund:", btnClose: "Schließen", winTitle: "SORTORA Meister! 🎉", btnNext: "Nächstes Level ➔",
+                loseTitle: "Zeit Abgelaufen! ⏰", loseDesc: "Versuche es noch einmal schneller!", btnTryAgain: "🔄 Nochmal versuchen",
+                capacityBadge: "🧪 Glas: {cap} Bälle ({cols} Farben)"
+            },
+            en: {
+                classicMode: "🎮 Classic", timerMode: "⏱️ Time Mode", level: "Level", stars: "Stars", back: "⬅️ Menu",
+                moves: "Moves", time: "Time", missions: "🎯 Missions", m1: "Solve Level", m2: "Stay under {moves} moves",
+                m3: "No Extra Tube used", btnMap: "🏠 Map", btnUndo: "↩️ Undo", btnTube: "🧪 +1 Tube",
+                btnRestart: "🔄 Restart", settingsTitle: "⚙️ Settings", soundLbl: "🔊 Sound & Music", langLbl: "🌐 Language / Sprache",
+                bgLbl: "🎨 Background:", btnClose: "Close", winTitle: "SORTORA Master! 🎉", btnNext: "Next Level ➔",
+                loseTitle: "Time's Up! ⏰", loseDesc: "Try again and be faster!", btnTryAgain: "🔄 Try Again",
+                capacityBadge: "🧪 Tube: {cap} Balls ({cols} Colors)"
+            }
+        };
+
+        let crazySDK = null;
+        window.addEventListener('DOMContentLoaded', () => {
+            try {
+                if (window.CrazyGames && window.CrazyGames.SDK && window.location.protocol !== 'file:') {
+                    crazySDK = window.CrazyGames.SDK;
+                    crazySDK.init().then(() => crazySDK.game.loadingStop()).catch(() => {});
+                }
+            } catch(e) {}
+        });
+
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSound(type) {
+            if (!soundEnabled) return;
+            try {
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                const now = audioCtx.currentTime;
+                if (type === 'select') {
+                    let osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
+                    osc.connect(gain); gain.connect(audioCtx.destination);
+                    osc.frequency.setValueAtTime(450, now); osc.frequency.exponentialRampToValueAtTime(650, now + 0.08);
+                    gain.gain.setValueAtTime(0.12, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+                    osc.start(now); osc.stop(now + 0.08);
+                } else if (type === 'pour') {
+                    let osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
+                    osc.connect(gain); gain.connect(audioCtx.destination);
+                    osc.frequency.setValueAtTime(320, now);
+                    gain.gain.setValueAtTime(0.15, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                    osc.start(now); osc.stop(now + 0.1);
+                } else if (type === 'win') {
+                    [400, 500, 600, 800].forEach((freq, idx) => {
+                        let osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
+                        osc.connect(gain); gain.connect(audioCtx.destination);
+                        osc.frequency.setValueAtTime(freq, now + idx * 0.1);
+                        gain.gain.setValueAtTime(0.15, now + idx * 0.1); gain.gain.exponentialRampToValueAtTime(0.01, now + idx * 0.1 + 0.25);
+                        osc.start(now + idx * 0.1); osc.stop(now + idx * 0.1 + 0.25);
+                    });
+                }
+            } catch(e) {}
+        }
+
+        const BALL_SKINS = [
+            { id: 'default', name: 'Klassisch 🔮', price: 0, icon: '⚪' },
+            { id: 'emoji', name: 'Emoticons 😎', price: 30, icon: '😎' },
+            { id: 'billiard', name: 'Billard 🎱', price: 50, icon: '🎱' },
+            { id: 'fire', name: 'Feuer 🔥', price: 80, icon: '🔥' }
+        ];
+
+        const TUBE_SKINS = [
+            { id: 'default', name: 'Standard 🧪', price: 0, class: '' },
+            { id: 'square', name: 'Eckig 🔲', price: 40, class: 'skin-square' },
+            { id: 'cork', name: 'Korken 🪵', price: 60, class: 'skin-cork' }
+        ];
+
+        function openShop() { document.getElementById('shop-stars-balance').innerText = userStars; renderShopGrid(); document.getElementById('shop-modal').classList.add('active'); }
+        function closeShop() { document.getElementById('shop-modal').classList.remove('active'); }
+
+        function renderShopGrid() {
+            let bGrid = document.getElementById('ball-skins-grid'); bGrid.innerHTML = '';
+            BALL_SKINS.forEach(skin => {
+                let isOwned = ownedSkins.includes(skin.id);
+                let isActive = activeBallSkin === skin.id;
+                bGrid.innerHTML += `
+                    <div class="shop-card ${isOwned ? 'owned' : ''} ${isActive ? 'active-skin' : ''}">
+                        <div style="font-size:1.3rem;">${skin.icon}</div>
+                        <div style="font-size:0.8rem; font-weight:bold;">${skin.name}</div>
+                        ${isActive ? '<span style="color:var(--gold-color); font-size:0.75rem;">Aktiv</span>' : 
+                          isOwned ? `<button class="btn" onclick="equipBallSkin('${skin.id}')">Wählen</button>` :
+                          `<button class="btn" style="background:#22c55e;" onclick="buySkin('${skin.id}', ${skin.price})">${skin.price} ⭐</button>`}
+                    </div>`;
+            });
+
+            let tGrid = document.getElementById('tube-skins-grid'); tGrid.innerHTML = '';
+            TUBE_SKINS.forEach(skin => {
+                let skinKey = 'tube_' + skin.id;
+                let isOwned = ownedSkins.includes(skinKey) || skin.id === 'default';
+                let isActive = activeTubeSkin === skin.id;
+                tGrid.innerHTML += `
+                    <div class="shop-card ${isOwned ? 'owned' : ''} ${isActive ? 'active-skin' : ''}">
+                        <div style="font-size:0.8rem; font-weight:bold;">${skin.name}</div>
+                        ${isActive ? '<span style="color:var(--gold-color); font-size:0.75rem;">Aktiv</span>' : 
+                          isOwned ? `<button class="btn" onclick="equipTubeSkin('${skin.id}')">Wählen</button>` :
+                          `<button class="btn" style="background:#22c55e;" onclick="buySkin('${skinKey}', ${skin.price})">${skin.price} ⭐</button>`}
+                    </div>`;
+            });
+        }
+
+        function buySkin(id, price) {
+            if (userStars >= price) {
+                userStars -= price; ownedSkins.push(id);
+                localStorage.setItem('sortora_currency_stars', userStars);
+                localStorage.setItem('sortora_owned_skins', JSON.stringify(ownedSkins));
+                renderShopGrid(); renderBoard();
+            }
+        }
+
+        function equipBallSkin(id) { activeBallSkin = id; localStorage.setItem('sortora_active_ball', id); renderShopGrid(); renderBoard(); }
+        function equipTubeSkin(id) { activeTubeSkin = id; localStorage.setItem('sortora_active_tube', id); renderShopGrid(); renderBoard(); }
+
+        function watchRewardedAd() {
+            if (crazySDK && crazySDK.ad) {
+                crazySDK.ad.requestAd('rewarded', {
+                    adStarted: () => {},
+                    adFinished: () => { userStars += 50; localStorage.setItem('sortora_currency_stars', userStars); alert("🎉 +50 Sterne erhalten!"); },
+                    adError: () => { alert("Werbung nicht verfügbar."); }
+                });
+            } else {
+                userStars += 50; localStorage.setItem('sortora_currency_stars', userStars); alert("🎉 Test: +50 Sterne erhalten!");
+            }
+        }
+
+        function shuffleTubes() {
+            let allBalls = [];
+            tubesData.forEach(tube => {
+                let isComplete = tube.length === maxTubeCapacity && tube.every(c => c === tube[0]);
+                if (!isComplete) { while (tube.length > 0) allBalls.push(tube.pop()); }
+            });
+            allBalls.sort(() => Math.random() - 0.5);
+            tubesData.forEach(tube => {
+                let isComplete = tube.length === maxTubeCapacity && tube.every(c => c === tube[0]);
+                if (!isComplete) { while (tube.length < maxTubeCapacity && allBalls.length > 0) tube.push(allBalls.pop()); }
+            });
+            playSound('select'); renderBoard();
+        }
+
+        function openAchievements() {
+            let totalClassicS = Object.values(classicStarsData).reduce((a,b)=>a+b,0);
+            let list = document.getElementById('achievements-list');
+            list.innerHTML = `
+                <div class="achieve-item ${classicUnlocked > 1 ? 'completed' : ''}"><span>Anfänger: Level 1 gelöst</span><span>${classicUnlocked > 1 ? '✅' : '🔒'}</span></div>
+                <div class="achieve-item ${totalClassicS >= 30 ? 'completed' : ''}"><span>Sammler: 30 ⭐ erhalten</span><span>${totalClassicS >= 30 ? '✅' : '🔒'}</span></div>
+                <div class="achieve-item ${classicUnlocked >= 50 ? 'completed' : ''}"><span>Profi: Level 50 erreicht</span><span>${classicUnlocked >= 50 ? '✅' : '🔒'}</span></div>`;
+            document.getElementById('achieve-modal').classList.add('active');
+        }
+        function closeAchievements() { document.getElementById('achieve-modal').classList.remove('active'); }
+
+        function updateLanguageTexts() {
+            let t = translations[currentLang];
+            document.getElementById('txt-mode-classic').innerText = t.classicMode;
+            document.getElementById('txt-mode-timer').innerText = t.timerMode;
+            document.getElementById('txt-lbl-lvl').innerText = t.level + ":";
+            document.getElementById('txt-lbl-lvl2').innerText = t.level + ":";
+            document.getElementById('txt-lbl-stars').innerText = t.stars + ":";
+            document.getElementById('txt-lbl-stars2').innerText = t.stars + ":";
+            document.getElementById('txt-btn-back').innerText = t.back;
+            document.getElementById('txt-lbl-moves').innerText = t.moves;
+            document.getElementById('txt-lbl-time').innerText = t.time;
+            document.getElementById('txt-lbl-stars3').innerText = t.stars;
+            document.getElementById('txt-lbl-missions').innerText = t.missions;
+            document.getElementById('txt-m1').innerText = t.m1;
+            document.getElementById('txt-m3').innerText = t.m3;
+            document.getElementById('txt-btn-map').innerText = t.btnMap;
+            document.getElementById('txt-btn-undo').innerText = t.btnUndo;
+            document.getElementById('txt-btn-tube').innerText = t.btnTube;
+            document.getElementById('txt-btn-restart').innerText = t.btnRestart;
+            document.getElementById('txt-settings-title').innerText = t.settingsTitle;
+            document.getElementById('txt-lbl-sound').innerText = t.soundLbl;
+            document.getElementById('txt-lbl-lang').innerText = t.langLbl;
+            document.getElementById('txt-lbl-bg').innerText = t.bgLbl;
+            document.getElementById('txt-btn-close').innerText = t.btnClose;
+            document.getElementById('txt-win-title').innerText = t.winTitle;
+            document.getElementById('txt-btn-next').innerText = t.btnNext;
+            document.getElementById('txt-lose-title').innerText = t.loseTitle;
+            document.getElementById('txt-lose-desc').innerText = t.loseDesc;
+            document.getElementById('txt-btn-tryagain').innerText = t.btnTryAgain;
+            document.getElementById('lang-btn').innerText = currentLang === 'de' ? 'DE 🇩🇪' : 'EN 🇬🇧';
+        }
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'de' ? 'en' : 'de';
+            localStorage.setItem('sortora_lang', currentLang);
+            updateLanguageTexts(); updateMissionsUI();
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            localStorage.setItem('sortora_sound', soundEnabled);
+            document.getElementById('sound-toggle-btn').innerText = soundEnabled ? 'AN / ON' : 'AUS / OFF';
+        }
+
+        function setBgTheme(themeClass) {
+            document.body.className = themeClass; currentBgTheme = themeClass; localStorage.setItem('sortora_bg', themeClass);
+            document.querySelectorAll('.bg-btn').forEach(btn => btn.classList.remove('active'));
+            let btnEl = document.getElementById('bg-btn-' + themeClass.replace('bg-', ''));
+            if(btnEl) btnEl.classList.add('active');
+        }
+
+        function openSettings() { document.getElementById('settings-modal').classList.add('active'); }
+        function closeSettings() { document.getElementById('settings-modal').classList.remove('active'); }
+
+        function switchScreen(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+        function showMainMenu() { clearInterval(timerInterval); updateMenuStats(); switchScreen('main-menu'); }
+
+        function updateMenuStats() {
+            document.getElementById('menu-classic-lvl').innerText = classicUnlocked;
+            document.getElementById('menu-classic-stars').innerText = Object.values(classicStarsData).reduce((a,b)=>a+b,0);
+            document.getElementById('menu-timer-lvl').innerText = timerUnlocked;
+            document.getElementById('menu-timer-stars').innerText = Object.values(timerStarsData).reduce((a,b)=>a+b,0);
+        }
+
+        function showLevelMap(mode) {
+            gameMode = mode; clearInterval(timerInterval);
+            let t = translations[currentLang];
+            document.getElementById('mode-title').innerText = mode === 'classic' ? t.classicMode : t.timerMode;
+            let starsData = mode === 'classic' ? classicStarsData : timerStarsData;
+            let unlocked = mode === 'classic' ? classicUnlocked : timerUnlocked;
+            document.getElementById('map-stars-total').innerText = `${Object.values(starsData).reduce((a,b)=>a+b,0)} ⭐`;
+
+            const grid = document.getElementById('level-grid'); grid.innerHTML = '';
+            for (let i = 1; i <= 200; i++) {
+                const btn = document.createElement('div');
+                let isUnlocked = i <= unlocked;
+                btn.className = `level-btn ${isUnlocked ? 'unlocked' : 'locked'}`;
+                btn.innerHTML = `<span>${isUnlocked ? i : '🔒'}</span>${isUnlocked && starsData[i] ? `<div class="level-stars">${'⭐'.repeat(starsData[i])}</div>` : ''}`;
+                if (isUnlocked) btn.onclick = () => startLevel(i);
+                grid.appendChild(btn);
+            }
+            switchScreen('level-map');
+        }
+
+        function startLevel(lvl) { currentLevel = lvl; switchScreen('game-screen'); initGame(); }
+
+        function calculateLevelSettings(level) {
+            let capacity = 4;
+            if (level > 150) capacity = 8; else if (level > 80) capacity = 7; else if (level > 30) capacity = 6; else if (level > 5) capacity = 5;
+            let colors = 3;
+            if (level > 120) colors = 10; else if (level > 90) colors = 9; else if (level > 60) colors = 8; else if (level > 40) colors = 7; else if (level > 20) colors = 6; else if (level > 10) colors = 5; else if (level > 3) colors = 4;
+            return { capacity, colors };
+        }
+
+        function initGame() {
+            clearInterval(timerInterval);
+            if (crazySDK && crazySDK.game) crazySDK.game.gameplayStart();
+
+            let settings = calculateLevelSettings(currentLevel);
+            maxTubeCapacity = settings.capacity;
+
+            let t = translations[currentLang];
+            let modeStars = gameMode === 'classic' ? classicStarsData : timerStarsData;
+            document.getElementById('level-num').innerText = currentLevel;
+            document.getElementById('stars-total').innerText = Object.values(modeStars).reduce((a,b)=>a+b,0);
+            
+            let capTxt = t.capacityBadge.replace('{cap}', maxTubeCapacity).replace('{cols}', settings.colors);
+            document.getElementById('capacity-badge').innerText = capTxt;
+
+            document.getElementById('moves-num').innerText = 0;
+            moves = 0; moveHistory = []; selectedTubeIndex = null; extraTubeAdded = false;
+            document.getElementById('add-tube-btn').disabled = false;
+            updateUndoButton();
+
+            if (gameMode === 'timer') {
+                document.getElementById('timer-box').style.display = 'block';
+                document.getElementById('missions-card').style.display = 'none';
+                timeLeft = 45 + settings.colors * 5;
+                document.getElementById('time-left').innerText = timeLeft;
+                timerInterval = setInterval(() => {
+                    timeLeft--;
+                    document.getElementById('time-left').innerText = timeLeft;
+                    if (timeLeft <= 0) { clearInterval(timerInterval); document.getElementById('lose-modal').classList.add('active'); }
+                }, 1000);
+            } else {
+                document.getElementById('timer-box').style.display = 'none';
+                document.getElementById('missions-card').style.display = 'block';
+            }
+
+            tubesData = generateSolvableLevel(currentLevel, settings);
+            completedTubesState = new Array(tubesData.length).fill(false);
+            maxAllowedMoves = Math.floor(settings.colors * maxTubeCapacity * 0.8) + 4;
+            updateMissionsUI();
+            renderBoard();
+        }
+
+        function generateSolvableLevel(level, settings) {
+            let colorCount = settings.colors, emptyTubes = 2, tubes = [];
+            for (let i = 0; i < colorCount; i++) {
+                let tube = [];
+                for(let k=0; k<maxTubeCapacity; k++) tube.push(COLOR_PALETTE[i]);
+                tubes.push(tube);
+            }
+            for (let i = 0; i < emptyTubes; i++) tubes.push([]);
+
+            let shuffleSteps = colorCount * 20 + level * 2, lastFrom = -1, lastTo = -1;
+            for (let step = 0; step < shuffleSteps; step++) {
+                let validMoves = [];
+                for (let f = 0; f < tubes.length; f++) {
+                    if (tubes[f].length === 0) continue;
+                    for (let t = 0; t < tubes.length; t++) {
+                        if (f === t || (f === lastTo && t === lastFrom)) continue;
+                        if (tubes[t].length < maxTubeCapacity) validMoves.push({ from: f, to: t });
+                    }
+                }
+                if (validMoves.length === 0) break;
+                let randomMove = validMoves[Math.floor(Math.random() * validMoves.length)];
+                let ball = tubes[randomMove.from].pop();
+                tubes[randomMove.to].push(ball);
+                lastFrom = randomMove.from; lastTo = randomMove.to;
+            }
+            return tubes;
+        }
+
+        function getTopStackInfo(tube) {
+            if (!tube || tube.length === 0) return { color: null, count: 0 };
+            let topColor = tube[tube.length - 1], count = 0;
+            for (let i = tube.length - 1; i >= 0; i--) { if (tube[i] === topColor) count++; else break; }
+            return { color: topColor, count: count };
+        }
+
+        function renderBoard() {
+            const board = document.getElementById('game-board');
+            if(!board) return;
+            board.innerHTML = '';
+            let calculatedHeight = (maxTubeCapacity * 46) + 30;
+
+            let tubeSkinObj = TUBE_SKINS.find(s => s.id === activeTubeSkin);
+            let tubeExtraClass = tubeSkinObj ? tubeSkinObj.class : '';
+
+            tubesData.forEach((tube, tubeIndex) => {
+                const tubeDiv = document.createElement('div');
+                tubeDiv.className = `tube ${tubeExtraClass}`;
+                tubeDiv.style.height = `${calculatedHeight}px`;
+
+                if (selectedTubeIndex === tubeIndex) tubeDiv.classList.add('selected');
+                let isComplete = tube.length === maxTubeCapacity && tube.every(color => color === tube[0]);
+                if (isComplete) tubeDiv.classList.add('completed');
+
+                tubeDiv.onclick = () => handleTubeClick(tubeIndex);
+                let stackInfo = getTopStackInfo(tube);
+
+                tube.forEach((color, ballIndex) => {
+                    const ballDiv = document.createElement('div');
+                    ballDiv.className = 'ball';
+                    ballDiv.style.backgroundColor = color;
+
+                    if (activeBallSkin === 'emoji') ballDiv.innerText = '😎';
+                    else if (activeBallSkin === 'billiard') ballDiv.innerText = ballIndex + 1;
+                    else if (activeBallSkin === 'fire') ballDiv.innerText = '🔥';
+
+                    if (selectedTubeIndex === tubeIndex && ballIndex >= tube.length - stackInfo.count) {
+                        ballDiv.classList.add('floating');
+                    }
+                    tubeDiv.appendChild(ballDiv);
+                });
+                board.appendChild(tubeDiv);
+            });
+        }
+
+        function handleTubeClick(index) {
+            if (selectedTubeIndex === null) {
+                if (tubesData[index].length > 0) { selectedTubeIndex = index; playSound('select'); renderBoard(); }
+            } else if (selectedTubeIndex === index) {
+                selectedTubeIndex = null; playSound('select'); renderBoard();
+            } else {
+                let sourceTube = tubesData[selectedTubeIndex], targetTube = tubesData[index];
+                if (canMove(sourceTube, targetTube)) {
+                    let sourceInfo = getTopStackInfo(sourceTube);
+                    let spaceAvailable = maxTubeCapacity - targetTube.length;
+                    let ballsToMoveCount = Math.min(sourceInfo.count, spaceAvailable);
+
+                    let movedBalls = [];
+                    for (let i = 0; i < ballsToMoveCount; i++) movedBalls.push(sourceTube.pop());
+                    for (let i = 0; i < ballsToMoveCount; i++) targetTube.push(movedBalls[i]);
+
+                    moveHistory.push({ from: selectedTubeIndex, to: index, balls: movedBalls });
+                    moves++;
+                    document.getElementById('moves-num').innerText = moves;
+                    if (gameMode === 'timer') timeLeft += 2;
+
+                    selectedTubeIndex = null;
+                    playSound('pour');
+                    updateUndoButton(); updateMissionsUI(); renderBoard(); checkWinCondition();
+                } else { selectedTubeIndex = null; playSound('select'); renderBoard(); }
+            }
+        }
+
+        function canMove(source, target) {
+            if (source.length === 0 || target.length >= maxTubeCapacity) return false;
+            if (target.length === 0) return true;
+            return source[source.length - 1] === target[target.length - 1];
+        }
+
+        function undoMove() {
+            if (moveHistory.length === 0) return;
+            let lastMove = moveHistory.pop();
+            let source = tubesData[lastMove.to], target = tubesData[lastMove.from];
+            for (let i = 0; i < lastMove.balls.length; i++) target.push(source.pop());
+            moves--; document.getElementById('moves-num').innerText = moves;
+            selectedTubeIndex = null; updateUndoButton(); updateMissionsUI(); playSound('select'); renderBoard();
+        }
+
+        function updateUndoButton() { document.getElementById('undo-btn').disabled = moveHistory.length === 0; }
+
+        function addExtraTube() {
+            if (extraTubeAdded) return;
+            tubesData.push([]); completedTubesState.push(false); extraTubeAdded = true;
+            document.getElementById('add-tube-btn').disabled = true; updateMissionsUI(); playSound('select'); renderBoard();
+        }
+
+        function updateMissionsUI() {
+            let t = translations[currentLang];
+            let m2TextEl = document.getElementById('m2-text');
+            if(m2TextEl) m2TextEl.innerText = t.m2.replace('{moves}', maxAllowedMoves);
+
+            let m2Comp = moves <= maxAllowedMoves;
+            let m2El = document.getElementById('m2');
+            if(m2El) {
+                m2El.className = 'mission-item ' + (m2Comp ? 'completed' : '');
+                let iconSpan = m2El.querySelector('.mission-icon');
+                if(iconSpan) iconSpan.innerText = m2Comp ? '✅' : '❌';
+            }
+
+            let m3Comp = !extraTubeAdded;
+            let m3El = document.getElementById('m3');
+            if(m3El) {
+                m3El.className = 'mission-item ' + (m3Comp ? 'completed' : '');
+                let iconSpan = m3El.querySelector('.mission-icon');
+                if(iconSpan) iconSpan.innerText = m3Comp ? '✅' : '❌';
+            }
+        }
+
+        function checkWinCondition() {
+            let isWin = tubesData.every(tube => tube.length === 0 || (tube.length === maxTubeCapacity && tube.every(c => c === tube[0])));
+            if (isWin) {
+                clearInterval(timerInterval);
+                if (crazySDK && crazySDK.game) crazySDK.game.gameplayStop();
+                playSound('win'); startConfetti();
+
+                let starsEarned = 3;
+                if (gameMode === 'classic') {
+                    let m1 = true, m2 = moves <= maxAllowedMoves, m3 = !extraTubeAdded;
+                    starsEarned = (m1 ? 1 : 0) + (m2 ? 1 : 0) + (m3 ? 1 : 0);
+                }
+
+                userStars += starsEarned * 2;
+                localStorage.setItem('sortora_currency_stars', userStars);
+
+                let targetStarsData = gameMode === 'classic' ? classicStarsData : timerStarsData;
+                targetStarsData[currentLevel] = Math.max(targetStarsData[currentLevel] || 0, starsEarned);
+
+                if (gameMode === 'classic') {
+                    localStorage.setItem('sortora_classic_stars', JSON.stringify(classicStarsData));
+                    if (currentLevel >= classicUnlocked) { classicUnlocked = currentLevel + 1; localStorage.setItem('sortora_classic_unlocked', classicUnlocked); }
+                } else {
+                    localStorage.setItem('sortora_timer_stars', JSON.stringify(timerStarsData));
+                    if (currentLevel >= timerUnlocked) { timerUnlocked = currentLevel + 1; localStorage.setItem('sortora_timer_unlocked', timerUnlocked); }
+                }
+
+                document.getElementById('win-missions-list').innerHTML = `🎉 Level ${currentLevel} gelöst!<br>⭐ +${starsEarned * 2} Bonus-Sterne erhalten!`;
+
+                for (let i = 1; i <= 3; i++) document.getElementById(`star-${i}`).className = 'star-item';
+                document.getElementById('win-modal').classList.add('active');
+
+                for (let i = 1; i <= 3; i++) {
+                    setTimeout(() => {
+                        let star = document.getElementById(`star-${i}`);
+                        if (i <= starsEarned) star.classList.add('pop');
+                        else star.classList.add('pop', 'grey');
+                    }, 300 + i * 300);
+                }
+            }
+        }
+
+        function nextLevel() { document.getElementById('win-modal').classList.remove('active'); stopConfetti(); currentLevel++; initGame(); }
+        function restartLevel() { document.getElementById('win-modal').classList.remove('active'); document.getElementById('lose-modal').classList.remove('active'); stopConfetti(); initGame(); }
+
+        const fxCanvas = document.getElementById('fx-canvas'), ctx = fxCanvas.getContext('2d');
+        let particles = [], fxInterval = null;
+        function resizeCanvas() { fxCanvas.width = window.innerWidth; fxCanvas.height = window.innerHeight; }
+        window.addEventListener('resize', resizeCanvas); resizeCanvas();
+
+        function startConfetti() {
+            particles = [];
+            for (let i = 0; i < 90; i++) {
+                particles.push({ x: Math.random() * fxCanvas.width, y: -10, color: COLOR_PALETTE[Math.floor(Math.random() * COLOR_PALETTE.length)], size: Math.random() * 8 + 4, speedY: Math.random() * 4 + 2, speedX: Math.random() * 2 - 1 });
+            }
+            if (!fxInterval) fxInterval = setInterval(updateFX, 1000 / 60);
+        }
+
+        function stopConfetti() { clearInterval(fxInterval); fxInterval = null; ctx.clearRect(0, 0, fxCanvas.width, fxCanvas.height); }
+        function updateFX() {
+            ctx.clearRect(0, 0, fxCanvas.width, fxCanvas.height);
+            particles.forEach((p) => { p.y += p.speedY; p.x += p.speedX; ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2); ctx.fill(); });
+        }
+
+        setBgTheme(currentBgTheme);
+        updateLanguageTexts();
+        updateMenuStats();
+    </script>
+</body>
+</html>
