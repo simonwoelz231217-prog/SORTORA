@@ -4,11 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>SORTORA - Color Sorting Puzzle</title>
-    <script src="https://sdk.crazygames.com/crazygames-sdk-v3.js" onerror="console.log('SDK optional')"></script>
     <style>
         :root {
             --bg-gradient: radial-gradient(circle at center, #1e62d0 0%, #082252 100%);
-            --glass-border: rgba(255, 255, 255, 0.5);
+            --glass-border: rgba(255, 255, 255, 0.6);
             --text-color: #ffffff;
             --gold-color: #facc15;
         }
@@ -26,12 +25,11 @@
         body.bg-neon { background: radial-gradient(circle at center, #831843 0%, #09090b 100%); }
         body.bg-dark { background: linear-gradient(180deg, #18181b 0%, #09090b 100%); }
 
-        /* HAUPTCONTAINER PASST SICH DEM GEWÄHLTEN FORMAT AN */
         .game-wrapper {
             width: 100%; display: flex; flex-direction: column; align-items: center; transition: all 0.3s ease;
         }
-        body.mode-portrait .game-wrapper { max-width: 600px; } /* Virtuelles Hochformat (600px Basis) */
-        body.mode-landscape .game-wrapper { max-width: 1100px; } /* Virtuelles Querformat */
+        body.mode-portrait .game-wrapper { max-width: 600px; }
+        body.mode-landscape .game-wrapper { max-width: 1100px; }
 
         header { text-align: center; width: 100%; position: relative; margin-bottom: 10px; }
         .top-bar-btns { position: absolute; top: 0; right: 5px; display: flex; gap: 8px; z-index: 10; }
@@ -108,22 +106,21 @@
         .btn:hover { background: #a855f7; border-color: #a855f7; }
         .btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-        .board-container { position: relative; display: flex; flex-direction: column; align-items: center; width: 100%; margin-top: 10px; }
-        .game-board { display: flex; flex-wrap: wrap; justify-content: center; align-content: center; gap: 15px 10px; width: 100%; min-height: 220px; padding: 10px; z-index: 2; }
+        .board-container { position: relative; display: flex; flex-direction: column; align-items: center; width: 100%; margin-top: 15px; }
+        .game-board { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; gap: 15px 10px; width: 100%; min-height: 240px; padding: 10px; z-index: 2; }
         .wood-table { width: 95%; height: 16px; background: linear-gradient(180deg, #d97706 0%, #b45309 60%, #78350f 100%); border-radius: 8px; border: 2px solid #f59e0b; margin-top: -6px; z-index: 1; }
 
-        /* GARANTIERT SICHTBARE GLÄSER MIT FESTER GRÖSSE */
         .tube {
-            width: 48px; height: 180px; border: 3px solid rgba(255, 255, 255, 0.7); border-top: none;
-            border-radius: 0 0 22px 22px; background: rgba(255, 255, 255, 0.18);
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4), inset 0 0 10px rgba(255, 255, 255, 0.3);
-            position: relative; display: flex; flex-direction: column-reverse; align-items: center; padding-bottom: 5px; cursor: pointer;
+            width: 48px; height: 190px; border: 4px solid rgba(255, 255, 255, 0.85); border-top: none;
+            border-radius: 0 0 24px 24px; background: rgba(255, 255, 255, 0.22);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+            position: relative; display: flex; flex-direction: column-reverse; align-items: center; padding-bottom: 6px; cursor: pointer;
         }
-        .tube.skin-square { border-radius: 0 0 5px 5px; }
-        .tube.skin-cork::before { content: '🪵'; position: absolute; top: -16px; font-size: 0.8rem; }
-        .tube::before { content: ''; position: absolute; top: -4px; width: 54px; height: 6px; border: 3px solid rgba(255, 255, 255, 0.8); border-radius: 3px; background: rgba(255, 255, 255, 0.4); }
-        .tube.selected { border-color: #facc15; box-shadow: 0 0 15px rgba(250, 204, 21, 0.9); }
-        .tube.completed { border-color: #22c55e; box-shadow: 0 0 12px rgba(34, 197, 94, 0.8); }
+        .tube.skin-square { border-radius: 0 0 6px 6px; }
+        .tube.skin-cork::before { content: '🪵'; position: absolute; top: -18px; font-size: 0.85rem; }
+        .tube::before { content: ''; position: absolute; top: -5px; width: 54px; height: 7px; border: 4px solid rgba(255, 255, 255, 0.9); border-radius: 3px; background: rgba(255, 255, 255, 0.5); }
+        .tube.selected { border-color: #facc15; box-shadow: 0 0 20px rgba(250, 204, 21, 0.9); }
+        .tube.completed { border-color: #22c55e; box-shadow: 0 0 15px rgba(34, 197, 94, 0.9); }
 
         .ball {
             width: 38px; height: 38px; border-radius: 50%; margin-top: 3px;
@@ -276,7 +273,7 @@
                 <button class="btn" id="orient-btn" onclick="toggleOrientation()">Hoch (600px)</button>
             </div>
             <div style="text-align:left; margin-top:6px;">
-                <span style="font-weight:bold; font-size:0.8rem;" id="txt-lbl-bg">🎨 Hintergrund:</span>
+                <span style="font-weight:bold; font-size:0.80rem;" id="txt-lbl-bg">🎨 Hintergrund:</span>
                 <div class="bg-options">
                     <button class="bg-btn active" onclick="setBgTheme('bg-lab')" id="bg-btn-lab">Labor</button>
                     <button class="bg-btn" onclick="setBgTheme('bg-magic')" id="bg-btn-magic">Magisch</button>
@@ -362,22 +359,20 @@
                 moves: "Moves", time: "Time", missions: "🎯 Missions", m1: "Solve Level", m2: "Stay under {moves} moves",
                 m3: "No Extra Tube used", btnMap: "🏠 Map", btnUndo: "↩️ Undo", btnTube: "🧪 +1 Tube",
                 btnRestart: "🔄 Restart", settingsTitle: "⚙️ Settings", soundLbl: "🔊 Sound & Music", langLbl: "🌐 Language / Sprache",
-                orientLbl: "📐 Format", bgLbl: "🎨 Background:", btnClose: "Close", winTitle: "SORTORA Master! 🎉", btnNext: "Next Level ➔",
+                bgLbl: "🎨 Background:", btnClose: "Close", winTitle: "SORTORA Master! 🎉", btnNext: "Next Level ➔",
                 loseTitle: "Time's Up! ⏰", loseDesc: "Try again and be faster!", btnTryAgain: "🔄 Try Again",
                 capacityBadge: "🧪 Tube: {cap} Balls ({cols} Colors)"
             }
         };
 
-        let crazySDK = null;
+        // Autarkes Laden komplett ohne externe SDK-Blockaden
         window.addEventListener('DOMContentLoaded', () => {
             try {
-                if (window.CrazyGames && window.CrazyGames.SDK && window.location.protocol !== 'file:') {
-                    crazySDK = window.CrazyGames.SDK;
-                    crazySDK.init().then(() => crazySDK.game.loadingStop()).catch(() => {});
-                }
-            } catch(e) {}
-            applyOrientation(currentOrientation);
-            showMainMenu();
+                applyOrientation(currentOrientation);
+                showMainMenu();
+            } catch(e) {
+                console.error(e);
+            }
         });
 
         function applyOrientation(orient) {
@@ -484,15 +479,7 @@
         function equipTubeSkin(id) { activeTubeSkin = id; safeSet('sortora_active_tube', id); renderShopGrid(); renderBoard(); }
 
         function watchRewardedAd() {
-            if (crazySDK && crazySDK.ad) {
-                crazySDK.ad.requestAd('rewarded', {
-                    adStarted: () => {},
-                    adFinished: () => { userStars += 50; safeSet('sortora_currency_stars', userStars); alert("🎉 +50 Sterne erhalten!"); },
-                    adError: () => { alert("Werbung nicht verfügbar."); }
-                });
-            } else {
-                userStars += 50; safeSet('sortora_currency_stars', userStars); alert("🎉 Test: +50 Sterne erhalten!");
-            }
+            userStars += 50; safeSet('sortora_currency_stars', userStars); alert("🎉 +50 Bonus-Sterne erhalten!");
         }
 
         function shuffleTubes() {
@@ -626,10 +613,6 @@
 
         function initGame() {
             clearInterval(timerInterval);
-            if (crazySDK && crazySDK.game && typeof crazySDK.game.gameplayStart === 'function') {
-                try { crazySDK.game.gameplayStart(); } catch(e) {}
-            }
-
             let settings = calculateLevelSettings(currentLevel);
             maxTubeCapacity = settings.capacity;
 
@@ -817,9 +800,6 @@
             let isWin = tubesData.every(tube => tube.length === 0 || (tube.length === maxTubeCapacity && tube.every(c => c === tube[0])));
             if (isWin) {
                 clearInterval(timerInterval);
-                if (crazySDK && crazySDK.game && typeof crazySDK.game.gameplayStop === 'function') {
-                    try { crazySDK.game.gameplayStop(); } catch(e) {}
-                }
                 playSound('win'); startConfetti();
 
                 let starsEarned = 3;
